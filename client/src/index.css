@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+  
+  /* iOS-style colors */
+  --ios-blue: hsl(214, 100%, 52%);
+  --ios-green: hsl(133, 76%, 58%);
+  --ios-red: hsl(5, 100%, 61%);
+  --ios-gray: hsl(240, 7%, 95%);
+  --ios-secondary: hsl(240, 6%, 50%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  }
+}
+
+@layer utilities {
+  .bg-ios-blue {
+    background-color: var(--ios-blue);
+  }
+  
+  .bg-ios-green {
+    background-color: var(--ios-green);
+  }
+  
+  .bg-ios-red {
+    background-color: var(--ios-red);
+  }
+  
+  .bg-ios-gray {
+    background-color: var(--ios-gray);
+  }
+  
+  .text-ios-blue {
+    color: var(--ios-blue);
+  }
+  
+  .text-ios-green {
+    color: var(--ios-green);
+  }
+  
+  .text-ios-red {
+    color: var(--ios-red);
+  }
+  
+  .text-ios-secondary {
+    color: var(--ios-secondary);
+  }
+}
+
+/* iPhone-style Time Picker */
+.time-picker-wheel {
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.time-picker-options {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  transition: transform 0.3s ease;
+}
+
+.time-option {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.time-option.selected {
+  font-weight: 600;
+  color: hsl(0, 0%, 0%);
+  transform: scale(1.1);
+}
+
+.time-option:not(.selected) {
+  color: var(--ios-secondary);
+  transform: scale(0.9);
+}
+
+.picker-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, 
+    hsla(240, 7%, 95%, 0.9) 0%, 
+    hsla(240, 7%, 95%, 0) 35%, 
+    hsla(240, 7%, 95%, 0) 65%, 
+    hsla(240, 7%, 95%, 0.9) 100%);
+  pointer-events: none;
+}
+
+.picker-selector {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 40px;
+  transform: translateY(-50%);
+  border-top: 1px solid hsl(240, 3%, 78%);
+  border-bottom: 1px solid hsl(240, 3%, 78%);
+  pointer-events: none;
+}
