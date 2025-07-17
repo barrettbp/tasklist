@@ -10,6 +10,7 @@ import { Play, Pause, Settings, List, Plus, Pen, Trash2, Check } from "lucide-re
 import { TimePicker } from "@/components/time-picker";
 import { TaskItem } from "@/components/task-item";
 import { TimerDisplay } from "@/components/timer-display";
+import { notificationManager } from "@/utils/notifications";
 import type { Task, InsertTask } from "@shared/schema";
 
 export default function Home() {
@@ -19,8 +20,26 @@ export default function Home() {
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [hasNotificationPermission, setHasNotificationPermission] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Check notification permission on mount
+  useEffect(() => {
+    const checkPermission = async () => {
+      if (notificationManager.isSupported()) {
+        const permission = notificationManager.getPermissionStatus();
+        setHasNotificationPermission(permission === 'granted');
+        
+        if (permission === 'default') {
+          // Request permission
+          await Notification.requestPermission();
+          setHasNotificationPermission(Notification.permission === 'granted');
+        }
+      }
+    };
+    checkPermission();
+  }, []);
 
   // Fetch tasks
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
@@ -79,13 +98,31 @@ export default function Home() {
         setTimeRemaining(prev => {
           if (prev <= 1) {
             // Timer finished
+            const completedTask = tasks[currentTaskIndex];
             setIsRunning(false);
-            toast({ title: "Task completed!" });
+            toast({ title: `${completedTask?.isInterval ? 'Break' : 'Task'} completed!` });
+            
+            // Send notification
+            if (hasNotificationPermission && completedTask) {
+              const nextTask = tasks[currentTaskIndex + 1];
+              notificationManager.showTaskComplete(
+                completedTask.name,
+                nextTask?.name
+              );
+            }
             
             // Move to next task if available
             if (currentTaskIndex < tasks.length - 1) {
+              const nextTask = tasks[currentTaskIndex + 1];
               setCurrentTaskIndex(prev => prev + 1);
-              setTimeRemaining(tasks[currentTaskIndex + 1]?.duration * 60 || 0);
+              setTimeRemaining(nextTask?.duration * 60 || 0);
+              
+              // Notify about next task start
+              if (hasNotificationPermission && nextTask) {
+                setTimeout(() => {
+                  notificationManager.showTaskStart(nextTask.name);
+                }, 2000); // Delay to not overlap with completion notification
+              }
             } else {
               toast({ title: "All tasks completed!" });
               setCurrentTaskIndex(0);
@@ -126,6 +163,7 @@ export default function Home() {
     createTaskMutation.mutate({
       name: taskName.trim(),
       duration: selectedDuration,
+      isInterval: false,
     });
   };
 
@@ -146,6 +184,11 @@ export default function Home() {
     if (!isRunning && timeRemaining === 0) {
       // Starting fresh
       setTimeRemaining(tasks[currentTaskIndex]?.duration * 60 || 0);
+      
+      // Notify about task start
+      if (hasNotificationPermission && tasks[currentTaskIndex]) {
+        notificationManager.showTaskStart(tasks[currentTaskIndex].name);
+      }
     }
 
     setIsRunning(!isRunning);
@@ -255,7 +298,7 @@ export default function Home() {
                       <div 
                         className={`w-3 h-3 rounded-full mr-4 ${
                           index === currentTaskIndex 
-                            ? 'bg-ios-blue' 
+                            ? (task.isInterval ? 'bg-ios-green' : 'bg-ios-blue')
                             : 'bg-gray-300'
                         }`} 
                       />
@@ -268,11 +311,11 @@ export default function Home() {
                           {task.name}
                         </div>
                         <div className="text-sm text-ios-secondary">
-                          {task.duration} minutes
+                          {task.duration} minutes {task.isInterval && '(Break)'}
                         </div>
                       </div>
                       {index === currentTaskIndex && (
-                        <div className="text-xs text-ios-secondary">Next</div>
+                        <div className="text-xs text-ios-secondary">Current</div>
                       )}
                     </div>
                   ))}
@@ -283,6 +326,18 @@ export default function Home() {
         ) : (
           /* Setup View */
           <div>
+            {/* Notification Status */}
+            {!hasNotificationPermission && notificationManager.isSupported() && (
+              <Card className="p-4 mb-4 bg-amber-50 border-amber-200 rounded-2xl">
+                <div className="flex items-center text-amber-800">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full mr-3"></div>
+                  <div className="text-sm">
+                    Enable notifications to get alerts when tasks complete
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {/* Add Task Form */}
             <Card className="p-6 mb-6 bg-white rounded-2xl shadow-sm">
               <h3 className="text-lg font-semibold mb-4 text-gray-900">

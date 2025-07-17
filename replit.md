@@ -4,6 +4,14 @@
 
 This is a full-stack Pomodoro timer application built with React frontend and Express backend. The application allows users to create and manage tasks with custom durations, run timer sessions, and track their productivity. It features a modern iOS-inspired design using Tailwind CSS and shadcn/ui components.
 
+## Recent Changes
+
+- **Automatic 5-minute intervals**: Each task now automatically generates a 5-minute break interval
+- **Default 25-minute duration**: New tasks default to 25 minutes if no duration is specified
+- **Push notifications**: macOS notifications for task completion and next task start
+- **Enhanced task display**: Fixed text wrapping in timer display and visual distinction for break intervals
+- **Improved UX**: Tasks and breaks are visually distinguished with color coding
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -30,10 +38,11 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Data Layer
-- **Database**: PostgreSQL hosted on Neon
+- **Database**: PostgreSQL hosted on Neon (currently using in-memory storage for development)
 - **ORM**: Drizzle ORM with TypeScript support
-- **Schema**: Shared schema definition between client and server
+- **Schema**: Shared schema definition between client and server with task/interval support
 - **Migrations**: Drizzle Kit for database migrations
+- **Task Structure**: Tasks have isInterval and parentTaskId fields for automatic break generation
 
 ### API Endpoints
 - `GET /api/tasks` - Retrieve all tasks
@@ -42,9 +51,10 @@ Preferred communication style: Simple, everyday language.
 - `DELETE /api/tasks/:id` - Delete a task
 
 ### Frontend Components
-- **TimerDisplay**: Circular progress timer with iOS-style design
-- **TaskItem**: Individual task management with inline editing
-- **TimePicker**: Touch-friendly duration selector
+- **TimerDisplay**: Circular progress timer with iOS-style design and text wrapping
+- **TaskItem**: Individual task management with inline editing and interval highlighting
+- **TimePicker**: Touch-friendly duration selector with iPhone-style interface
+- **NotificationManager**: macOS push notification system for task alerts
 - **Custom UI Components**: Full shadcn/ui component library
 
 ### Storage Strategy
@@ -54,11 +64,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Data Flow
 
-1. **Task Management**: Users create tasks with name and duration
-2. **Timer Sessions**: Users select tasks and run timed sessions
-3. **Real-time Updates**: Timer state managed with React hooks and intervals
-4. **Persistence**: Task data persisted via REST API calls
-5. **Optimistic Updates**: UI updates immediately with server sync
+1. **Task Management**: Users create tasks with name and duration (defaults to 25 minutes)
+2. **Automatic Intervals**: 5-minute break intervals are automatically created after each task
+3. **Timer Sessions**: Users run sequential tasks and breaks with automatic progression
+4. **Push Notifications**: macOS notifications sent at task completion and next task start
+5. **Real-time Updates**: Timer state managed with React hooks and intervals
+6. **Persistence**: Task data persisted via REST API calls
+7. **Optimistic Updates**: UI updates immediately with server sync
 
 ## External Dependencies
 

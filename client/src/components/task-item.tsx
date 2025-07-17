@@ -46,7 +46,9 @@ export function TaskItem({ task, onUpdate, onDelete, isUpdating, isDeleting }: T
   };
 
   return (
-    <div className="flex items-center p-4 border border-gray-100 rounded-xl">
+    <div className={`flex items-center p-4 border border-gray-100 rounded-xl ${
+      task.isInterval ? 'bg-green-50 border-green-200' : ''
+    }`}>
       <div className="flex-1">
         {isEditing ? (
           <Input
@@ -57,7 +59,10 @@ export function TaskItem({ task, onUpdate, onDelete, isUpdating, isDeleting }: T
             autoFocus
           />
         ) : (
-          <div className="font-medium text-gray-900">{task.name}</div>
+          <div className="font-medium text-gray-900">
+            {task.name}
+            {task.isInterval && <span className="ml-2 text-xs text-ios-green">(Break)</span>}
+          </div>
         )}
         <div className="text-sm text-ios-secondary">{task.duration} minutes</div>
       </div>

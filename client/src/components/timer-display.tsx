@@ -40,11 +40,11 @@ export function TimerDisplay({ timeRemaining, progress, currentTask }: TimerDisp
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center px-4">
           <div className="text-4xl font-bold text-gray-900">
             {formatTime(timeRemaining)}
           </div>
-          <div className="text-sm text-ios-secondary mt-1">
+          <div className="text-sm text-ios-secondary mt-1 max-w-[140px] mx-auto break-words leading-tight">
             {currentTask?.name || 'No task selected'}
           </div>
         </div>

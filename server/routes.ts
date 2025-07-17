@@ -19,7 +19,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tasks", async (req, res) => {
     try {
       const validatedData = insertTaskSchema.parse(req.body);
+      
+      // Set default duration to 25 minutes if not provided
+      if (!validatedData.duration) {
+        validatedData.duration = 25;
+      }
+      
       const task = await storage.createTask(validatedData);
+      
+      // Automatically create a 5-minute interval after the task (unless it's already an interval)
+      if (!validatedData.isInterval) {
+        const intervalData = {
+          name: `Break after ${validatedData.name}`,
+          duration: 5,
+          isInterval: true,
+          parentTaskId: task.id
+        };
+        await storage.createTask(intervalData);
+      }
+      
       res.status(201).json(task);
     } catch (error) {
       if (error instanceof z.ZodError) {
