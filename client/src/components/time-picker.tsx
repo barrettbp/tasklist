@@ -80,14 +80,15 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
   };
 
   return (
-    <div className="bg-ios-gray rounded-xl p-4">
+    <div className="bg-ios-gray rounded-xl p-4 touch-manipulation">
       <div
         ref={containerRef}
-        className="time-picker-wheel relative"
+        className="time-picker-wheel relative cursor-grab active:cursor-grabbing"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
+        style={{ userSelect: 'none' }}
       >
         <div
           className="time-picker-options"

@@ -27,16 +27,10 @@ export default function Home() {
 
   // Check notification permission on mount
   useEffect(() => {
-    const checkPermission = async () => {
+    const checkPermission = () => {
       if (notificationManager.isSupported()) {
         const permission = notificationManager.getPermissionStatus();
         setHasNotificationPermission(permission === 'granted');
-        
-        if (permission === 'default') {
-          // Request permission
-          await Notification.requestPermission();
-          setHasNotificationPermission(Notification.permission === 'granted');
-        }
       }
     };
     checkPermission();
@@ -112,11 +106,12 @@ export default function Home() {
               );
             }
             
-            // Move to next task if available
+            // Move to next task if available and start automatically
             if (currentTaskIndex < tasks.length - 1) {
               const nextTask = tasks[currentTaskIndex + 1];
               setCurrentTaskIndex(prev => prev + 1);
               setTimeRemaining(nextTask?.duration * 60 || 0);
+              setIsRunning(true); // Auto-start next task
               
               // Notify about next task start
               if (hasNotificationPermission && nextTask) {
@@ -178,6 +173,16 @@ export default function Home() {
     deleteTaskMutation.mutate(id);
   };
 
+  const handleEnableNotifications = async () => {
+    if (notificationManager.isSupported()) {
+      const permission = await Notification.requestPermission();
+      setHasNotificationPermission(permission === 'granted');
+      if (permission === 'granted') {
+        toast({ title: "Notifications enabled!" });
+      }
+    }
+  };
+
   const handleSkipTask = () => {
     if (currentTaskIndex < tasks.length - 1) {
       const completedTask = tasks[currentTaskIndex];
@@ -237,7 +242,7 @@ export default function Home() {
     <div className="bg-ios-gray min-h-screen">
       {/* Tab Navigation */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto lg:max-w-2xl xl:max-w-4xl">
           <div className="flex relative">
             <div 
               className="absolute bottom-0 left-0 w-1/2 h-0.5 bg-ios-blue transition-transform duration-300"
@@ -267,12 +272,13 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto p-6">
+      <div className="max-w-md mx-auto p-4 sm:p-6 lg:max-w-2xl xl:max-w-4xl">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-12">
         {activeTab === 'run' ? (
           /* Run View */
-          <div>
+          <div className="lg:col-span-2 xl:col-span-1">
             {/* Timer Display */}
-            <Card className="p-8 mb-6 text-center bg-white rounded-2xl shadow-sm">
+            <Card className="p-4 sm:p-8 mb-6 text-center bg-white rounded-2xl shadow-sm">
               <TimerDisplay 
                 timeRemaining={timeRemaining}
                 progress={progress}
@@ -365,15 +371,24 @@ export default function Home() {
           </div>
         ) : (
           /* Setup View */
-          <div>
+          <div className="lg:col-span-2 xl:col-span-1">
             {/* Notification Status */}
             {!hasNotificationPermission && notificationManager.isSupported() && (
               <Card className="p-4 mb-4 bg-amber-50 border-amber-200 rounded-2xl">
-                <div className="flex items-center text-amber-800">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full mr-3"></div>
-                  <div className="text-sm">
-                    Enable notifications to get alerts when tasks complete
+                <div className="flex items-center justify-between text-amber-800">
+                  <div className="flex items-center flex-1">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full mr-3"></div>
+                    <div className="text-sm">
+                      Enable notifications to get alerts when tasks complete
+                    </div>
                   </div>
+                  <Button
+                    onClick={handleEnableNotifications}
+                    size="sm"
+                    className="ml-3 bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1 rounded-lg"
+                  >
+                    Enable
+                  </Button>
                 </div>
               </Card>
             )}
@@ -449,6 +464,7 @@ export default function Home() {
             </Card>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

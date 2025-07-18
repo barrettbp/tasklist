@@ -30,7 +30,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Automatically create a 5-minute interval after the task (unless it's already an interval)
       if (!validatedData.isInterval) {
         const intervalData = {
-          name: `Break after ${validatedData.name}`,
+          name: "Break",
           duration: 5,
           isInterval: true,
           parentTaskId: task.id
