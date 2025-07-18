@@ -144,17 +144,18 @@ export default function Home() {
     };
   }, [isRunning, timeRemaining, currentTaskIndex, tasks, toast]);
 
-  // Reset timer when tasks change or current task changes
+  // Reset timer when tasks change or current task changes (but not when pausing/resuming)
   useEffect(() => {
     if (tasks.length > 0 && currentTaskIndex < tasks.length) {
-      if (!isRunning) {
+      if (!isRunning && !hasStartedTimer) {
         setTimeRemaining(tasks[currentTaskIndex]?.duration * 60 || 0);
       }
     } else {
       setTimeRemaining(0);
       setCurrentTaskIndex(0);
+      setHasStartedTimer(false);
     }
-  }, [tasks, currentTaskIndex, isRunning]);
+  }, [tasks, currentTaskIndex, isRunning, hasStartedTimer]);
 
   const handleAddTask = () => {
     if (!taskName.trim()) {
@@ -208,8 +209,8 @@ export default function Home() {
       return;
     }
 
-    if (!isRunning && timeRemaining === 0) {
-      // Starting fresh
+    if (!isRunning && !hasStartedTimer) {
+      // Starting fresh for the first time
       setTimeRemaining(tasks[currentTaskIndex]?.duration * 60 || 0);
       setHasStartedTimer(true);
       
@@ -278,7 +279,7 @@ export default function Home() {
                 currentTask={currentTask}
               />
               
-              <div className="space-y-4">
+              <div className="flex flex-col items-center space-y-6">
                 <Button
                   size="lg"
                   className={`px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform transition-transform active:scale-95 ${

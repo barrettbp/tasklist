@@ -13,6 +13,7 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
   );
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
+  const lastWheelTime = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const updateSelection = (newIndex: number) => {
@@ -33,7 +34,7 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
     
     const currentY = e.touches[0].clientY;
     const deltaY = startY.current - currentY;
-    const threshold = 20;
+    const threshold = 40; // Increased threshold for slower scrolling
     
     if (Math.abs(deltaY) > threshold) {
       if (deltaY > 0 && currentIndex < TIME_OPTIONS.length - 1) {
@@ -52,10 +53,25 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    if (e.deltaY > 0 && currentIndex < TIME_OPTIONS.length - 1) {
-      updateSelection(currentIndex + 1);
-    } else if (e.deltaY < 0 && currentIndex > 0) {
-      updateSelection(currentIndex - 1);
+    
+    const now = Date.now();
+    const timeSinceLastWheel = now - lastWheelTime.current;
+    
+    // Throttle wheel events to 200ms intervals
+    if (timeSinceLastWheel < 200) {
+      return;
+    }
+    
+    lastWheelTime.current = now;
+    
+    // Use a threshold to make wheel scrolling less sensitive
+    const threshold = 5;
+    if (Math.abs(e.deltaY) > threshold) {
+      if (e.deltaY > 0 && currentIndex < TIME_OPTIONS.length - 1) {
+        updateSelection(currentIndex + 1);
+      } else if (e.deltaY < 0 && currentIndex > 0) {
+        updateSelection(currentIndex - 1);
+      }
     }
   };
 
