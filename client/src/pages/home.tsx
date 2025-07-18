@@ -385,7 +385,7 @@ export default function Home() {
                   <Button
                     onClick={handleEnableNotifications}
                     size="sm"
-                    className="ml-3 bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1 rounded-lg"
+                    className="ml-3 hover:bg-amber-700 text-white text-xs px-3 py-1 rounded-lg bg-[#1bc904]"
                   >
                     Enable
                   </Button>
