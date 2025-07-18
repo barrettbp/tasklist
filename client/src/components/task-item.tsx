@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pen, Trash2, Check } from "lucide-react";
+import { TimePicker } from "@/components/time-picker";
 import type { Task, InsertTask } from "@shared/schema";
 
 interface TaskItemProps {
@@ -15,17 +16,26 @@ interface TaskItemProps {
 export function TaskItem({ task, onUpdate, onDelete, isUpdating, isDeleting }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(task.name);
+  const [editDuration, setEditDuration] = useState(task.duration);
 
   const handleEdit = () => {
     if (isEditing) {
       // Save edit
+      const updates: Partial<InsertTask> = {};
       if (editName.trim() && editName.trim() !== task.name) {
-        onUpdate(task.id, { name: editName.trim() });
+        updates.name = editName.trim();
+      }
+      if (editDuration !== task.duration) {
+        updates.duration = editDuration;
+      }
+      if (Object.keys(updates).length > 0) {
+        onUpdate(task.id, updates);
       }
       setIsEditing(false);
     } else {
       // Enter edit mode
       setEditName(task.name);
+      setEditDuration(task.duration);
       setIsEditing(true);
     }
   };
@@ -41,32 +51,44 @@ export function TaskItem({ task, onUpdate, onDelete, isUpdating, isDeleting }: T
       handleEdit();
     } else if (e.key === 'Escape') {
       setEditName(task.name);
+      setEditDuration(task.duration);
       setIsEditing(false);
     }
   };
 
   return (
-    <div className={`flex items-center p-4 border border-gray-100 rounded-xl ${
+    <div className={`p-4 border border-gray-100 rounded-xl ${
       task.isInterval ? 'bg-green-50 border-green-200' : ''
     }`}>
-      <div className="flex-1">
-        {isEditing ? (
-          <Input
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            onKeyDown={handleKeyPress}
-            className="bg-transparent border-b border-ios-blue outline-none font-medium text-gray-900 px-0"
-            autoFocus
-          />
-        ) : (
-          <div className="font-medium text-gray-900">
-            {task.name}
-            {task.isInterval && <span className="ml-2 text-xs text-ios-green">(Break)</span>}
+      {isEditing ? (
+        <div className="space-y-4">
+          <div>
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={handleKeyPress}
+              className="bg-transparent border-b border-ios-blue outline-none font-medium text-gray-900 px-0"
+              autoFocus
+              placeholder="Task name"
+            />
           </div>
-        )}
-        <div className="text-sm text-ios-secondary">{task.duration} minutes</div>
-      </div>
-      <div className="flex space-x-2">
+          <div>
+            <div className="text-sm text-ios-secondary mb-2">Duration</div>
+            <TimePicker value={editDuration} onChange={setEditDuration} />
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center">
+          <div className="flex-1">
+            <div className="font-medium text-gray-900">
+              {task.name}
+              {task.isInterval && <span className="ml-2 text-xs text-ios-green">(Break)</span>}
+            </div>
+            <div className="text-sm text-ios-secondary">{task.duration} minutes</div>
+          </div>
+        </div>
+      )}
+      <div className="flex justify-end space-x-2 mt-4">
         <Button
           variant="ghost"
           size="sm"

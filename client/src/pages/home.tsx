@@ -21,6 +21,7 @@ export default function Home() {
   const [isRunning, setIsRunning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [hasNotificationPermission, setHasNotificationPermission] = useState(false);
+  const [hasStartedTimer, setHasStartedTimer] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
@@ -127,6 +128,7 @@ export default function Home() {
               toast({ title: "All tasks completed!" });
               setCurrentTaskIndex(0);
               setTimeRemaining(0);
+              setHasStartedTimer(false);
             }
             return 0;
           }
@@ -175,6 +177,31 @@ export default function Home() {
     deleteTaskMutation.mutate(id);
   };
 
+  const handleSkipTask = () => {
+    if (currentTaskIndex < tasks.length - 1) {
+      const completedTask = tasks[currentTaskIndex];
+      const nextTask = tasks[currentTaskIndex + 1];
+      
+      setCurrentTaskIndex(prev => prev + 1);
+      setTimeRemaining(nextTask?.duration * 60 || 0);
+      setIsRunning(false);
+      
+      toast({ title: `Skipped: ${completedTask?.name}` });
+      
+      // Notify about next task
+      if (hasNotificationPermission && nextTask) {
+        notificationManager.showTaskStart(nextTask.name);
+      }
+    } else {
+      // Skipping the last task
+      setCurrentTaskIndex(0);
+      setTimeRemaining(0);
+      setIsRunning(false);
+      setHasStartedTimer(false);
+      toast({ title: "All tasks completed!" });
+    }
+  };
+
   const toggleTimer = () => {
     if (tasks.length === 0) {
       toast({ title: "Add tasks in Setup tab first", variant: "destructive" });
@@ -184,6 +211,7 @@ export default function Home() {
     if (!isRunning && timeRemaining === 0) {
       // Starting fresh
       setTimeRemaining(tasks[currentTaskIndex]?.duration * 60 || 0);
+      setHasStartedTimer(true);
       
       // Notify about task start
       if (hasNotificationPermission && tasks[currentTaskIndex]) {
@@ -250,27 +278,38 @@ export default function Home() {
                 currentTask={currentTask}
               />
               
-              <Button
-                size="lg"
-                className={`px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform transition-transform active:scale-95 ${
-                  isRunning 
-                    ? 'bg-ios-red hover:bg-ios-red/90 text-white' 
-                    : 'bg-ios-blue hover:bg-ios-blue/90 text-white'
-                }`}
-                onClick={toggleTimer}
-              >
-                {isRunning ? (
-                  <>
-                    <Pause className="w-5 h-5 mr-2" />
-                    Pause
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-5 h-5 mr-2" />
-                    {timeRemaining > 0 ? 'Resume' : 'Start'}
-                  </>
+              <div className="space-y-4">
+                <Button
+                  size="lg"
+                  className={`px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform transition-transform active:scale-95 ${
+                    isRunning 
+                      ? 'bg-ios-red hover:bg-ios-red/90 text-white' 
+                      : 'bg-ios-blue hover:bg-ios-blue/90 text-white'
+                  }`}
+                  onClick={toggleTimer}
+                >
+                  {isRunning ? (
+                    <>
+                      <Pause className="w-5 h-5 mr-2" />
+                      Pause
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-5 h-5 mr-2" />
+                      {hasStartedTimer && timeRemaining > 0 ? 'Resume' : 'Play'}
+                    </>
+                  )}
+                </Button>
+                
+                {tasks.length > 0 && (
+                  <button
+                    onClick={handleSkipTask}
+                    className="text-ios-secondary text-sm hover:underline hover:text-gray-700 transition-colors"
+                  >
+                    Skip
+                  </button>
                 )}
-              </Button>
+              </div>
             </Card>
 
             {/* Task Queue */}
