@@ -6,11 +6,13 @@ This is a full-stack Pomodoro timer application built with React frontend and Ex
 
 ## Recent Changes
 
-- **Automatic 5-minute intervals**: Each task now automatically generates a 5-minute break interval
-- **Default 25-minute duration**: New tasks default to 25 minutes if no duration is specified
-- **Push notifications**: macOS notifications for task completion and next task start
-- **Enhanced task display**: Fixed text wrapping in timer display and visual distinction for break intervals
-- **Improved UX**: Tasks and breaks are visually distinguished with color coding
+- **Session storage persistence**: Tasks and timer state persist across browser refreshes and restarts
+- **Auto-progression**: Tasks automatically advance to next task without manual intervention
+- **Clear all functionality**: "Clear all" link appears when there are 3+ tasks
+- **Improved responsive design**: Enhanced mobile, tablet, and desktop layouts
+- **Better time picker**: Smoother scrolling with throttling and improved touch controls
+- **Root-level index.html**: Moved index.html to root level with proper SEO meta tags
+- **Enhanced button styling**: Updated notification enable button with custom green color
 
 ## User Preferences
 
