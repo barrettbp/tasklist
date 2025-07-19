@@ -10,9 +10,12 @@ Deploy your Pomodoro Timer app to Netlify in 3 simple steps!
 
 That's it! Netlify will automatically:
 - Detect build settings from `netlify.toml`
-- Run `npm run build && cp _redirects dist/public/_redirects`
-- Deploy to global CDN
+- Run `npm run build:netlify` (custom build script)
+- Deploy to global CDN with redirects included
 - Set up serverless functions
+
+**Build Process**: 
+The custom build script creates the frontend build and copies redirect rules to ensure API routing works correctly.
 
 ## 🔧 Configuration (Pre-built)
 
@@ -49,11 +52,15 @@ Your app will be available at: `https://your-site-name.netlify.app`
 ### Debug Commands:
 ```bash
 # Local testing
-npm run build
+npx vite build && cp _redirects dist/public/
 npm run dev
 
 # Check if redirects file exists
 ls -la dist/public/_redirects
+cat dist/public/_redirects
+
+# Test build command (same as Netlify)
+npx vite build && cp _redirects dist/public/
 ```
 
 ## 📊 Verify Deployment

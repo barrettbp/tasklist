@@ -1,9 +1,10 @@
 [build]
   publish = "dist/public"
-  command = "npm run build && cp _redirects dist/public/_redirects"
+  command = "npx vite build && cp _redirects dist/public/"
 
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/api/tasks"
@@ -22,3 +23,4 @@
 
 [build.environment]
   NODE_ENV = "production"
+  NODE_VERSION = "18"
