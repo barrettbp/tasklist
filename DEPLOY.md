@@ -60,7 +60,7 @@ ls -la dist/public/_redirects
 cat dist/public/_redirects
 
 # Test build command (same as Netlify)
-npx vite build && cp _redirects dist/public/
+npx vite build --config vite.config.prod.ts && cp _redirects dist/public/
 ```
 
 ## 📊 Verify Deployment

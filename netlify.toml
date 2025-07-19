@@ -1,6 +1,6 @@
 [build]
-  publish = "dist/public"
-  command = "npx vite build && cp _redirects dist/public/"
+  publish = "dist/public" 
+  command = "npm ci --include=dev && npx vite build --config vite.config.prod.ts && cp _redirects dist/public/"
 
 [functions]
   directory = "netlify/functions"
@@ -24,3 +24,4 @@
 [build.environment]
   NODE_ENV = "production"
   NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"

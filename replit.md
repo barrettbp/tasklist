@@ -7,10 +7,11 @@ This is a full-stack Pomodoro timer application built with React frontend and Ex
 ## Recent Changes
 
 - **Netlify deployment ready**: Optimized for effortless Netlify serverless deployment
-- **Netlify Functions**: Created native serverless function handlers in netlify/functions/
-- **Configuration**: Added netlify.toml with proper routing and build settings
-- **Removed Vercel**: Cleaned up all Vercel-related files and dependencies
-- **Native API handling**: Direct function handlers without Express wrapper
+- **Build configuration fixed**: Created vite.config.prod.ts to avoid Replit plugin conflicts
+- **Netlify Functions**: Native serverless function handlers with enhanced error logging
+- **Redirect configuration**: Both netlify.toml redirects and _redirects file for API routing
+- **Debug endpoint**: Added /api/debug for deployment verification
+- **Enhanced build process**: npm ci with dev dependencies and proper file copying
 - **Session storage persistence**: Tasks and timer state persist across browser refreshes and restarts
 - **Auto-progression**: Tasks automatically advance to next task without manual intervention
 
