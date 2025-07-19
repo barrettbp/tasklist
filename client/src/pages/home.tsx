@@ -139,10 +139,10 @@ export default function Home() {
     },
   });
 
-  // Timer logic
+  // Timer logic - using setInterval for better background tab support
   useEffect(() => {
     if (isRunning && timeRemaining > 0) {
-      timerRef.current = setTimeout(() => {
+      timerRef.current = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
             // Timer finished
@@ -150,12 +150,14 @@ export default function Home() {
             setIsRunning(false);
             toast({ title: `${completedTask?.isInterval ? 'Break' : 'Task'} completed!` });
             
-            // Send notification
+            // Send browser notification (works even in background)
             if (hasNotificationPermission && completedTask) {
               const nextTask = tasks[currentTaskIndex + 1];
+              const completedTaskName = completedTask.isInterval ? 'Break' : completedTask.name;
+              const nextTaskName = nextTask?.isInterval ? 'Break' : nextTask?.name;
               notificationManager.showTaskComplete(
-                completedTask.name,
-                nextTask?.name
+                completedTaskName,
+                nextTaskName
               );
             }
             
@@ -169,7 +171,8 @@ export default function Home() {
               // Notify about next task start
               if (hasNotificationPermission && nextTask) {
                 setTimeout(() => {
-                  notificationManager.showTaskStart(nextTask.name);
+                  const nextTaskName = nextTask.isInterval ? 'Break' : nextTask.name;
+                  notificationManager.showTaskStart(nextTaskName);
                 }, 2000); // Delay to not overlap with completion notification
               }
             } else {
@@ -187,10 +190,10 @@ export default function Home() {
 
     return () => {
       if (timerRef.current) {
-        clearTimeout(timerRef.current);
+        clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, timeRemaining, currentTaskIndex, tasks, toast]);
+  }, [isRunning, timeRemaining, currentTaskIndex, tasks, toast, hasNotificationPermission]);
 
   // Reset timer when tasks change or current task changes (but not when pausing/resuming)
   useEffect(() => {
@@ -211,11 +214,21 @@ export default function Home() {
       return;
     }
 
+    // Create the main task
     createTaskMutation.mutate({
       name: taskName.trim(),
       duration: selectedDuration,
       isInterval: false,
     });
+
+    // Automatically add a 5-minute break after the task
+    setTimeout(() => {
+      createTaskMutation.mutate({
+        name: "Break",
+        duration: 5,
+        isInterval: true,
+      });
+    }, 100); // Small delay to ensure proper order
   };
 
   const handleUpdateTask = (id: number, data: Partial<InsertTask>) => {
@@ -268,7 +281,8 @@ export default function Home() {
       
       // Notify about next task
       if (hasNotificationPermission && nextTask) {
-        notificationManager.showTaskStart(nextTask.name);
+        const nextTaskName = nextTask.isInterval ? 'Break' : nextTask.name;
+        notificationManager.showTaskStart(nextTaskName);
       }
     } else {
       // Skipping the last task
@@ -293,7 +307,8 @@ export default function Home() {
       
       // Notify about task start
       if (hasNotificationPermission && tasks[currentTaskIndex]) {
-        notificationManager.showTaskStart(tasks[currentTaskIndex].name);
+        const taskName = tasks[currentTaskIndex].isInterval ? 'Break' : tasks[currentTaskIndex].name;
+        notificationManager.showTaskStart(taskName);
       }
     }
 
@@ -426,7 +441,7 @@ export default function Home() {
                             ? 'text-gray-900' 
                             : 'text-gray-600'
                         }`}>
-                          {task.name}
+                          {task.isInterval ? 'Break' : task.name}
                         </div>
                         <div className="text-sm text-ios-secondary">
                           {task.duration} minutes {task.isInterval && '(Break)'}

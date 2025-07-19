@@ -81,7 +81,7 @@ export function TaskItem({ task, onUpdate, onDelete, isUpdating, isDeleting }: T
         <div className="flex items-center">
           <div className="flex-1">
             <div className="font-medium text-gray-900">
-              {task.name}
+              {task.isInterval ? 'Break' : task.name}
               {task.isInterval && <span className="ml-2 text-xs text-ios-green">(Break)</span>}
             </div>
             <div className="text-sm text-ios-secondary">{task.duration} minutes</div>

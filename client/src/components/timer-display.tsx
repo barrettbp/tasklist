@@ -45,7 +45,7 @@ export function TimerDisplay({ timeRemaining, progress, currentTask }: TimerDisp
             {formatTime(timeRemaining)}
           </div>
           <div className="text-xs sm:text-sm text-ios-secondary mt-1 max-w-[120px] sm:max-w-[140px] mx-auto break-words leading-tight">
-            {currentTask?.name || 'No task selected'}
+            {currentTask ? (currentTask.isInterval ? 'Break' : currentTask.name) : 'No task selected'}
           </div>
         </div>
       </div>
