@@ -27,15 +27,21 @@ export default function Home() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Check notification permission on mount
+  // Check notification permission on mount and request if needed
   useEffect(() => {
-    const checkPermission = () => {
+    const checkAndRequestPermission = async () => {
       if (notificationManager.isSupported()) {
         const permission = notificationManager.getPermissionStatus();
         setHasNotificationPermission(permission === 'granted');
+        
+        // Auto-request permission on first load if not already decided
+        if (permission === 'default') {
+          const newPermission = await notificationManager.requestPermission();
+          setHasNotificationPermission(newPermission === 'granted');
+        }
       }
     };
-    checkPermission();
+    checkAndRequestPermission();
   }, []);
 
   // Fetch tasks with session storage fallback
@@ -87,18 +93,19 @@ export default function Home() {
   const createTaskMutation = useMutation({
     mutationFn: async (data: InsertTask) => {
       const response = await apiRequest("POST", "/api/tasks", data);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       return response.json();
     },
     onSuccess: (newTask) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      setTaskName("");
-      setSelectedDuration(25);
-      toast({ title: "Task added successfully!" });
       
       // Update cached tasks immediately for offline support
       setCachedTasks(prev => [...prev, newTask]);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Task creation error:', error);
       toast({ title: "Failed to add task", variant: "destructive" });
     },
   });
@@ -209,32 +216,59 @@ export default function Home() {
     }
   }, [tasks, currentTaskIndex, isRunning, hasStartedTimer]);
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!taskName.trim()) {
       toast({ title: "Please enter a task name", variant: "destructive" });
       return;
     }
 
-    // Create both the main task and break in one operation to avoid duplicate breaks
-    const mainTask = {
-      name: taskName.trim(),
-      duration: selectedDuration,
-      isInterval: false,
-    };
+    const taskNameValue = taskName.trim();
+    const durationValue = selectedDuration;
+    
+    // Clear form immediately
+    setTaskName("");
+    setSelectedDuration(25);
 
-    const breakTask = {
-      name: "Break",
-      duration: 5,
-      isInterval: true,
-    };
-
-    // Add main task first
-    createTaskMutation.mutate(mainTask, {
-      onSuccess: () => {
-        // Only add break after main task is successfully created
-        createTaskMutation.mutate(breakTask);
+    try {
+      // Add main task
+      const mainTaskResponse = await apiRequest("POST", "/api/tasks", {
+        name: taskNameValue,
+        duration: durationValue,
+        isInterval: false,
+      });
+      
+      if (!mainTaskResponse.ok) {
+        throw new Error('Failed to create main task');
       }
-    });
+      
+      const mainTask = await mainTaskResponse.json();
+      
+      // Add break task
+      const breakTaskResponse = await apiRequest("POST", "/api/tasks", {
+        name: "Break",
+        duration: 5,
+        isInterval: true,
+      });
+      
+      if (!breakTaskResponse.ok) {
+        throw new Error('Failed to create break task');
+      }
+      
+      const breakTask = await breakTaskResponse.json();
+      
+      // Update local state
+      setCachedTasks(prev => [...prev, mainTask, breakTask]);
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      
+      toast({ title: "Task and break added successfully!" });
+      
+    } catch (error) {
+      console.error('Error adding tasks:', error);
+      toast({ title: "Failed to add task", variant: "destructive" });
+      // Restore form values on error
+      setTaskName(taskNameValue);
+      setSelectedDuration(durationValue);
+    }
   };
 
   const handleUpdateTask = (id: number, data: Partial<InsertTask>) => {
@@ -474,26 +508,7 @@ export default function Home() {
         ) : (
           /* Setup View */
           <div className="lg:col-span-2 xl:col-span-1">
-            {/* Notification Status */}
-            {!hasNotificationPermission && notificationManager.isSupported() && (
-              <Card className="p-4 mb-4 bg-amber-50 border-amber-200 rounded-2xl">
-                <div className="flex items-center justify-between text-amber-800">
-                  <div className="flex items-center flex-1">
-                    <div className="w-2 h-2 bg-amber-500 rounded-full mr-3"></div>
-                    <div className="text-sm">
-                      Enable notifications to get alerts when tasks complete
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleEnableNotifications}
-                    size="sm"
-                    className="ml-3 hover:bg-amber-700 text-white text-xs px-3 py-1 rounded-lg bg-[#1bc904]"
-                  >
-                    Enable
-                  </Button>
-                </div>
-              </Card>
-            )}
+
 
             {/* Add Task Form */}
             <Card className="p-6 mb-6 bg-white rounded-2xl shadow-sm">
@@ -527,7 +542,6 @@ export default function Home() {
                 
                 <Button
                   onClick={handleAddTask}
-                  disabled={createTaskMutation.isPending}
                   className="w-full bg-ios-blue hover:bg-ios-blue/90 text-white py-4 rounded-xl font-semibold text-lg shadow-lg"
                 >
                   <Plus className="w-5 h-5 mr-2" />

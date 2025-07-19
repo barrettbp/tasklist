@@ -53,19 +53,20 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     
     const now = Date.now();
     const timeSinceLastWheel = now - lastWheelTime.current;
     
-    // Throttle wheel events to 200ms intervals
-    if (timeSinceLastWheel < 200) {
+    // Throttle wheel events to 300ms intervals for slower scrolling
+    if (timeSinceLastWheel < 300) {
       return;
     }
     
     lastWheelTime.current = now;
     
     // Use a threshold to make wheel scrolling less sensitive
-    const threshold = 5;
+    const threshold = 10;
     if (Math.abs(e.deltaY) > threshold) {
       if (e.deltaY > 0 && currentIndex < TIME_OPTIONS.length - 1) {
         updateSelection(currentIndex + 1);
@@ -75,12 +76,41 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
     }
   };
 
+  const handleMouseEnter = () => {
+    // Disable body scroll when hovering over time picker
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleMouseLeave = () => {
+    // Re-enable body scroll when leaving time picker
+    document.body.style.overflow = 'unset';
+  };
+
   const handleOptionClick = (index: number) => {
     updateSelection(index);
   };
 
+  // Update selection when value prop changes
+  useEffect(() => {
+    const index = TIME_OPTIONS.indexOf(value);
+    if (index !== -1 && index !== currentIndex) {
+      setCurrentIndex(index);
+    }
+  }, [value, currentIndex]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   return (
-    <div className="bg-ios-gray rounded-xl p-4 touch-manipulation">
+    <div 
+      className="bg-ios-gray rounded-xl p-4 touch-manipulation"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div
         ref={containerRef}
         className="time-picker-wheel relative cursor-grab active:cursor-grabbing"
