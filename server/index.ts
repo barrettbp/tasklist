@@ -67,10 +67,10 @@ async function initializeApp() {
   }
 }
 
-// Initialize the app immediately for both development and production
+// Initialize the app for serverless deployment
 let appInitialized = false;
 
-async function getApp() {
+async function initializeForServerless() {
   if (!appInitialized) {
     await initializeApp();
     appInitialized = true;
@@ -98,4 +98,4 @@ if (process.env.NODE_ENV !== "production" && import.meta.url === `file://${proce
   })().catch(console.error);
 }
 
-export { getApp };
+export { initializeForServerless };

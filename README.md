@@ -36,23 +36,37 @@ npm run build
 npm start
 ```
 
-## Deployment
+## Deployment on Vercel
 
-### Vercel
-1. Connect your repository to Vercel
-2. The `vercel.json` configuration is already set up
-3. Deploy with: `vercel --prod`
+This project is optimized for seamless deployment on Vercel:
 
-### Netlify
-1. Connect your repository to Netlify
-2. Build command: `npm run build`
-3. Publish directory: `dist/public`
-4. The `netlify.toml` configuration handles serverless functions
+### Automatic Deployment
+1. **Connect Repository**: Link your GitHub/GitLab repository to Vercel
+2. **Import Project**: Vercel will automatically detect the configuration
+3. **Deploy**: Click deploy - no additional setup required!
 
-### Traditional Hosting
-1. Run `npm run build` to build the application
-2. Serve the `dist/public` directory as static files
-3. Run the Express server with `npm start`
+### Manual Deployment
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy to production
+vercel --prod
+
+# Deploy for preview
+vercel
+```
+
+### Configuration
+- `vercel.json` - Pre-configured for optimal deployment
+- `api/` directory - Contains serverless functions
+- Build command: `npm run build` (automatically detected)
+- Output directory: `dist/public` (automatically detected)
+
+### Environment Variables (Optional)
+If using a PostgreSQL database, add these in Vercel dashboard:
+- `DATABASE_URL` - Your PostgreSQL connection string
+- `NODE_ENV` - Set to "production" (automatically set by Vercel)
 
 ## Environment Variables
 
@@ -63,22 +77,24 @@ npm start
 ## Project Structure
 
 ```
-├── api/                 # Serverless function entry points
+├── api/                 # Vercel serverless functions
+│   ├── index.ts        # Main API handler
+│   └── tasks.ts        # Tasks API endpoint
 ├── client/             # React frontend
 │   ├── src/
-│   ├── components/     # React components
-│   ├── pages/          # Application pages
-│   ├── utils/          # Utility functions
+│   │   ├── components/ # React components
+│   │   ├── pages/      # Application pages
+│   │   └── utils/      # Utility functions
 │   └── index.html      # Original HTML template
-├── server/             # Express backend
-│   ├── index.ts        # Main server file (exports app for serverless)
+├── server/             # Express backend (exports for serverless)
+│   ├── index.ts        # Main server file
 │   ├── routes.ts       # API routes
 │   └── storage.ts      # Data storage layer
 ├── shared/             # Shared types and schemas
-├── netlify/            # Netlify functions
 ├── index.html          # Root-level HTML with SEO
 ├── vercel.json         # Vercel deployment configuration
-└── netlify.toml        # Netlify deployment configuration
+├── .vercelignore       # Files to ignore during deployment
+└── README.md           # This file
 ```
 
 ## License

@@ -100,10 +100,11 @@ The application is now configured for serverless deployment with multiple hostin
 2. **Backend**: Express app exports for serverless functions
 3. **Database**: Drizzle pushes schema changes to PostgreSQL (optional)
 
-### Serverless Deployment
-- **Vercel**: Uses `vercel.json` and `api/index.ts` entry point
-- **Netlify**: Uses `netlify.toml` and `netlify/functions/api.ts` entry point
-- **Traditional**: Express server can still run standalone
+### Vercel Deployment
+- **Serverless Functions**: Uses `api/` directory with TypeScript handlers
+- **Static Files**: Frontend built to `dist/public` and served by CDN
+- **Configuration**: `vercel.json` handles routing and build settings
+- **Development**: Express server runs locally, exports for serverless in production
 
 ### Environment Configuration
 - **Development**: Local dev server with HMR (port 5000)
