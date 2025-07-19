@@ -11,6 +11,7 @@ import { TimePicker } from "@/components/time-picker";
 import { TaskItem } from "@/components/task-item";
 import { TimerDisplay } from "@/components/timer-display";
 import { notificationManager } from "@/utils/notifications";
+import { sessionStorage } from "@/utils/sessionStorage";
 import type { Task, InsertTask } from "@shared/schema";
 
 export default function Home() {
@@ -36,10 +37,50 @@ export default function Home() {
     checkPermission();
   }, []);
 
-  // Fetch tasks
-  const { data: tasks = [], isLoading } = useQuery<Task[]>({
+  // Fetch tasks with session storage fallback
+  const { data: serverTasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
   });
+  
+  // Use session storage as backup when server is unavailable
+  const [cachedTasks, setCachedTasks] = useState<Task[]>([]);
+  const tasks = serverTasks.length > 0 ? serverTasks : cachedTasks;
+  
+  // Load cached tasks on mount
+  useEffect(() => {
+    const cached = sessionStorage.loadTasks();
+    setCachedTasks(cached);
+  }, []);
+  
+  // Save tasks to session storage whenever they change
+  useEffect(() => {
+    if (tasks.length > 0) {
+      sessionStorage.saveTasks(tasks);
+    }
+  }, [tasks]);
+  
+  // Load and restore timer state on mount
+  useEffect(() => {
+    const savedState = sessionStorage.loadTimerState();
+    if (savedState && tasks.length > 0) {
+      setCurrentTaskIndex(savedState.currentTaskIndex || 0);
+      setTimeRemaining(savedState.timeRemaining || 0);
+      setHasStartedTimer(savedState.hasStartedTimer || false);
+      // Don't restore running state - user should manually resume
+    }
+  }, [tasks.length]);
+  
+  // Save timer state periodically
+  useEffect(() => {
+    if (hasStartedTimer) {
+      sessionStorage.saveTimerState({
+        currentTaskIndex,
+        timeRemaining,
+        hasStartedTimer,
+        isRunning: false // Always save as paused
+      });
+    }
+  }, [currentTaskIndex, timeRemaining, hasStartedTimer]);
 
   // Create task mutation
   const createTaskMutation = useMutation({
@@ -47,10 +88,14 @@ export default function Home() {
       const response = await apiRequest("POST", "/api/tasks", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (newTask) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       setTaskName("");
+      setSelectedDuration(25);
       toast({ title: "Task added successfully!" });
+      
+      // Update cached tasks immediately for offline support
+      setCachedTasks(prev => [...prev, newTask]);
     },
     onError: () => {
       toast({ title: "Failed to add task", variant: "destructive" });
@@ -63,9 +108,14 @@ export default function Home() {
       const response = await apiRequest("PATCH", `/api/tasks/${id}`, data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedTask, { id, data }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       toast({ title: "Task updated successfully!" });
+      
+      // Update cached tasks immediately for offline support
+      setCachedTasks(prev => prev.map(task => 
+        task.id === id ? { ...task, ...data } : task
+      ));
     },
     onError: () => {
       toast({ title: "Failed to update task", variant: "destructive" });
@@ -77,9 +127,12 @@ export default function Home() {
     mutationFn: async (id: number) => {
       await apiRequest("DELETE", `/api/tasks/${id}`);
     },
-    onSuccess: () => {
+    onSuccess: (_, deletedId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       toast({ title: "Task deleted successfully!" });
+      
+      // Update cached tasks immediately for offline support
+      setCachedTasks(prev => prev.filter(task => task.id !== deletedId));
     },
     onError: () => {
       toast({ title: "Failed to delete task", variant: "destructive" });
@@ -171,6 +224,25 @@ export default function Home() {
 
   const handleDeleteTask = (id: number) => {
     deleteTaskMutation.mutate(id);
+  };
+
+  const handleClearAllTasks = () => {
+    if (tasks.length > 0) {
+      // Clear all tasks from server and local storage
+      tasks.forEach(task => {
+        if (task.id) {
+          deleteTaskMutation.mutate(task.id);
+        }
+      });
+      // Clear cached tasks and timer state
+      setCachedTasks([]);
+      sessionStorage.clearAll();
+      setIsRunning(false);
+      setTimeRemaining(0);
+      setCurrentTaskIndex(0);
+      setHasStartedTimer(false);
+      toast({ title: "All tasks cleared!" });
+    }
   };
 
   const handleEnableNotifications = async () => {
@@ -436,10 +508,20 @@ export default function Home() {
 
             {/* Task List */}
             <Card className="p-6 bg-white rounded-2xl shadow-sm">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">
-                <List className="inline w-5 h-5 mr-2 text-ios-blue" />
-                My Tasks
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  <List className="inline w-5 h-5 mr-2 text-ios-blue" />
+                  My Tasks
+                </h3>
+                {tasks.length > 2 && (
+                  <button
+                    onClick={handleClearAllTasks}
+                    className="text-ios-secondary text-sm hover:text-red-600 transition-colors"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
               
               {isLoading ? (
                 <div className="text-center text-ios-secondary">Loading tasks...</div>
