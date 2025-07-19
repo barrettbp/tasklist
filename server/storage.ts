@@ -8,6 +8,11 @@ export interface IStorage {
   deleteTask(id: number): Promise<boolean>;
 }
 
+// Helper function for easy access
+export function getMemStorage(): MemStorage {
+  return new MemStorage();
+}
+
 export class MemStorage implements IStorage {
   private tasks: Map<number, Task>;
   private currentId: number;

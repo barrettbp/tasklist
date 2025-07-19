@@ -43,7 +43,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     // Handle different API routes
     if (method === 'GET' && (path === '' || path === '/')) {
       // GET /api/tasks
-      const tasks = await storage.getAllTasks();
+      const tasks = await storage.getTasks();
       return {
         statusCode: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
