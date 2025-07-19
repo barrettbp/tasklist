@@ -21,11 +21,15 @@ export function DraggableTaskList({
 }: DraggableTaskListProps) {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
+    
+    // Don't do anything if dropped in the same position
+    if (result.destination.index === result.source.index) return;
 
     const items = Array.from(tasks);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
+    // Call the reorder callback with the new order
     onReorder(items);
   };
 

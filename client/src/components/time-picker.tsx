@@ -5,7 +5,7 @@ interface TimePickerProps {
   onChange: (value: number) => void;
 }
 
-const TIME_OPTIONS = [5, 10, 20, 25, 30, 45, 60];
+const TIME_OPTIONS = [1, 5, 10, 20, 25, 30, 45, 60];
 
 export function TimePicker({ value, onChange }: TimePickerProps) {
   const [currentIndex, setCurrentIndex] = useState(

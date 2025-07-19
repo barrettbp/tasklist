@@ -51,7 +51,10 @@ export default function Home() {
   
   // Use session storage as backup when server is unavailable
   const [cachedTasks, setCachedTasks] = useState<Task[]>([]);
-  const tasks = serverTasks.length > 0 ? serverTasks : cachedTasks;
+  const [reorderedTasks, setReorderedTasks] = useState<Task[] | null>(null);
+  
+  // Use reordered tasks first, then server tasks, then cached tasks
+  const tasks = reorderedTasks || (serverTasks.length > 0 ? serverTasks : cachedTasks);
   
   // Load cached tasks on mount
   useEffect(() => {
@@ -59,12 +62,16 @@ export default function Home() {
     setCachedTasks(cached);
   }, []);
   
-  // Save tasks to session storage whenever they change
+  // Save tasks to session storage whenever server tasks change (but not reordered ones)
   useEffect(() => {
-    if (tasks.length > 0) {
-      sessionStorage.saveTasks(tasks);
+    if (serverTasks.length > 0) {
+      sessionStorage.saveTasks(serverTasks);
+      // Clear reordered tasks when we get fresh server data
+      if (reorderedTasks && JSON.stringify(serverTasks) === JSON.stringify(reorderedTasks)) {
+        setReorderedTasks(null);
+      }
     }
-  }, [tasks]);
+  }, [serverTasks, reorderedTasks]);
   
   // Load and restore timer state on mount
   useEffect(() => {
@@ -100,6 +107,9 @@ export default function Home() {
     },
     onSuccess: (newTask) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      setTaskName("");
+      setSelectedDuration(25);
+      toast({ title: "Task added successfully!" });
       
       // Update cached tasks immediately for offline support
       setCachedTasks(prev => [...prev, newTask]);
@@ -216,59 +226,18 @@ export default function Home() {
     }
   }, [tasks, currentTaskIndex, isRunning, hasStartedTimer]);
 
-  const handleAddTask = async () => {
+  const handleAddTask = () => {
     if (!taskName.trim()) {
       toast({ title: "Please enter a task name", variant: "destructive" });
       return;
     }
 
-    const taskNameValue = taskName.trim();
-    const durationValue = selectedDuration;
-    
-    // Clear form immediately
-    setTaskName("");
-    setSelectedDuration(25);
-
-    try {
-      // Add main task
-      const mainTaskResponse = await apiRequest("POST", "/api/tasks", {
-        name: taskNameValue,
-        duration: durationValue,
-        isInterval: false,
-      });
-      
-      if (!mainTaskResponse.ok) {
-        throw new Error('Failed to create main task');
-      }
-      
-      const mainTask = await mainTaskResponse.json();
-      
-      // Add break task
-      const breakTaskResponse = await apiRequest("POST", "/api/tasks", {
-        name: "Break",
-        duration: 5,
-        isInterval: true,
-      });
-      
-      if (!breakTaskResponse.ok) {
-        throw new Error('Failed to create break task');
-      }
-      
-      const breakTask = await breakTaskResponse.json();
-      
-      // Update local state
-      setCachedTasks(prev => [...prev, mainTask, breakTask]);
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      
-      toast({ title: "Task and break added successfully!" });
-      
-    } catch (error) {
-      console.error('Error adding tasks:', error);
-      toast({ title: "Failed to add task", variant: "destructive" });
-      // Restore form values on error
-      setTaskName(taskNameValue);
-      setSelectedDuration(durationValue);
-    }
+    // Just create the main task - no automatic breaks
+    createTaskMutation.mutate({
+      name: taskName.trim(),
+      duration: selectedDuration,
+      isInterval: false,
+    });
   };
 
   const handleUpdateTask = (id: number, data: Partial<InsertTask>) => {
@@ -279,23 +248,32 @@ export default function Home() {
     deleteTaskMutation.mutate(id);
   };
 
-  const handleReorderTasks = (reorderedTasks: Task[]) => {
-    // Update the local state immediately for smooth UX
-    setCachedTasks(reorderedTasks);
+  const handleReorderTasks = (newTasks: Task[]) => {
+    // Update the reordered tasks state immediately for UI
+    setReorderedTasks(newTasks);
+    
+    // Update both server data (for query cache) and cached tasks
+    queryClient.setQueryData(["/api/tasks"], newTasks);
+    setCachedTasks(newTasks);
+    
+    // Save to session storage for persistence
+    sessionStorage.saveTasks(newTasks);
     
     // TODO: In a real app, you'd send the reordered list to the server
-    // For now, we just update the local cached tasks
-    sessionStorage.saveTasks(reorderedTasks);
+    // For now we just update the local state
   };
 
-  const handleClearAllTasks = () => {
-    if (tasks.length > 0) {
-      // Clear all tasks from server and local storage
-      tasks.forEach(task => {
-        if (task.id) {
-          deleteTaskMutation.mutate(task.id);
-        }
-      });
+  const handleClearAllTasks = async () => {
+    if (tasks.length === 0) return;
+    
+    try {
+      // Delete all tasks one by one
+      const deletePromises = tasks.map(task => 
+        apiRequest("DELETE", `/api/tasks/${task.id}`)
+      );
+      
+      await Promise.all(deletePromises);
+      
       // Clear cached tasks and timer state
       setCachedTasks([]);
       sessionStorage.clearAll();
@@ -303,7 +281,15 @@ export default function Home() {
       setTimeRemaining(0);
       setCurrentTaskIndex(0);
       setHasStartedTimer(false);
+      
+      // Refresh the task list
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      
       toast({ title: "All tasks cleared!" });
+      
+    } catch (error) {
+      console.error('Error clearing tasks:', error);
+      toast({ title: "Failed to clear some tasks", variant: "destructive" });
     }
   };
 
