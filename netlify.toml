@@ -1,13 +1,18 @@
 [build]
   publish = "dist/public"
-  command = "npm run build"
+  command = "npm run build && cp _redirects dist/public/_redirects"
 
 [functions]
   directory = "netlify/functions"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/tasks"
+  to = "/.netlify/functions/tasks"
+  status = 200
+
+[[redirects]]
+  from = "/api/tasks/*"
+  to = "/.netlify/functions/tasks"
   status = 200
 
 [[redirects]]

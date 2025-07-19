@@ -10,6 +10,12 @@ const corsHeaders = {
 };
 
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+  console.log('Netlify function called:', {
+    method: event.httpMethod,
+    path: event.path,
+    query: event.queryStringParameters
+  });
+
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -22,11 +28,20 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   const storage = getMemStorage();
   
   try {
-    const path = event.path.replace('/.netlify/functions/tasks', '');
+    // Extract the path from the API call - remove both possible prefixes
+    let path = event.path;
+    if (path.startsWith('/.netlify/functions/tasks')) {
+      path = path.replace('/.netlify/functions/tasks', '');
+    } else if (path.startsWith('/api/tasks')) {
+      path = path.replace('/api/tasks', '');
+    }
+    
     const method = event.httpMethod;
 
+    console.log('Processed path:', path, 'method:', method);
+
     // Handle different API routes
-    if (method === 'GET' && path === '') {
+    if (method === 'GET' && (path === '' || path === '/')) {
       // GET /api/tasks
       const tasks = await storage.getAllTasks();
       return {
@@ -36,7 +51,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       };
     }
 
-    if (method === 'POST' && path === '') {
+    if (method === 'POST' && (path === '' || path === '/')) {
       // POST /api/tasks
       const body = event.body ? JSON.parse(event.body) : {};
       const validatedData = insertTaskSchema.parse(body);
@@ -93,7 +108,15 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     return {
       statusCode: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Internal Server Error' }),
+      body: JSON.stringify({ 
+        message: 'Internal Server Error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        debug: {
+          path: event.path,
+          method: event.httpMethod,
+          query: event.queryStringParameters
+        }
+      }),
     };
   }
 };

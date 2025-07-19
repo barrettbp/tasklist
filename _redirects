@@ -1,0 +1,3 @@
+/api/tasks  /.netlify/functions/tasks  200
+/api/tasks/*  /.netlify/functions/tasks  200
+/*  /index.html  200
