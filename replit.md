@@ -6,11 +6,11 @@ This is a full-stack Pomodoro timer application built with React frontend and Ex
 
 ## Recent Changes
 
-- **Serverless deployment ready**: Refactored Express server to export app for Vercel/Netlify deployment
-- **Vercel configuration**: Added vercel.json with proper routing and build configuration
-- **API directory structure**: Created api/index.ts entry point for serverless functions
-- **Production/development separation**: Server only starts in development, exports app for production
-- **Root-level index.html**: Moved index.html to root level with proper SEO meta tags
+- **Netlify deployment ready**: Optimized for effortless Netlify serverless deployment
+- **Netlify Functions**: Created native serverless function handlers in netlify/functions/
+- **Configuration**: Added netlify.toml with proper routing and build settings
+- **Removed Vercel**: Cleaned up all Vercel-related files and dependencies
+- **Native API handling**: Direct function handlers without Express wrapper
 - **Session storage persistence**: Tasks and timer state persist across browser refreshes and restarts
 - **Auto-progression**: Tasks automatically advance to next task without manual intervention
 
@@ -100,11 +100,11 @@ The application is now configured for serverless deployment with multiple hostin
 2. **Backend**: Express app exports for serverless functions
 3. **Database**: Drizzle pushes schema changes to PostgreSQL (optional)
 
-### Vercel Deployment
-- **Serverless Functions**: Uses `api/` directory with TypeScript handlers
-- **Static Files**: Frontend built to `dist/public` and served by CDN
-- **Configuration**: `vercel.json` handles routing and build settings
-- **Development**: Express server runs locally, exports for serverless in production
+### Netlify Deployment
+- **Serverless Functions**: Uses `netlify/functions/` directory with TypeScript handlers
+- **Static Files**: Frontend built to `dist/public` and served by global CDN
+- **Configuration**: `netlify.toml` handles routing, redirects, and build settings
+- **Development**: Express server runs locally, Netlify functions handle API in production
 
 ### Environment Configuration
 - **Development**: Local dev server with HMR (port 5000)

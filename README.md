@@ -15,7 +15,7 @@ A productivity-focused Pomodoro timer application with iPhone-style interface, a
 ## Tech Stack
 
 - **Frontend**: React 18 + TypeScript + Vite
-- **Backend**: Express.js + Node.js
+- **Backend**: Express.js + Node.js (development) / Netlify Functions (production)
 - **UI Framework**: shadcn/ui + Tailwind CSS
 - **State Management**: TanStack Query (React Query)
 - **Database**: PostgreSQL with Drizzle ORM (in-memory for development)
@@ -32,41 +32,38 @@ npm run dev
 # Build for production
 npm run build
 
-# Start production server
+# Start production server (local testing)
 npm start
 ```
 
-## Deployment on Vercel
+## Deployment on Netlify
 
-This project is optimized for seamless deployment on Vercel:
+This project is optimized for seamless deployment on Netlify:
 
 ### Automatic Deployment
-1. **Connect Repository**: Link your GitHub/GitLab repository to Vercel
-2. **Import Project**: Vercel will automatically detect the configuration
+1. **Connect Repository**: Link your GitHub/GitLab repository to Netlify
+2. **Import Project**: Netlify will automatically detect the configuration
 3. **Deploy**: Click deploy - no additional setup required!
 
 ### Manual Deployment
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Install Netlify CLI
+npm install -g netlify-cli
 
-# Deploy to production
-vercel --prod
-
-# Deploy for preview
-vercel
+# Build and deploy
+netlify deploy --prod --dir=dist/public
 ```
 
 ### Configuration
-- `vercel.json` - Pre-configured for optimal deployment
-- `api/` directory - Contains serverless functions
+- `netlify.toml` - Pre-configured for optimal deployment
+- `netlify/functions/` - Contains serverless functions
 - Build command: `npm run build` (automatically detected)
-- Output directory: `dist/public` (automatically detected)
+- Publish directory: `dist/public` (automatically detected)
 
 ### Environment Variables (Optional)
-If using a PostgreSQL database, add these in Vercel dashboard:
+If using a PostgreSQL database, add these in Netlify dashboard:
 - `DATABASE_URL` - Your PostgreSQL connection string
-- `NODE_ENV` - Set to "production" (automatically set by Vercel)
+- `NODE_ENV` - Set to "production" (automatically set by Netlify)
 
 ## Environment Variables
 
@@ -77,23 +74,22 @@ If using a PostgreSQL database, add these in Vercel dashboard:
 ## Project Structure
 
 ```
-├── api/                 # Vercel serverless functions
-│   ├── index.ts        # Main API handler
-│   └── tasks.ts        # Tasks API endpoint
+├── netlify/            # Netlify serverless functions
+│   └── functions/
+│       └── tasks.ts    # Tasks API endpoint
 ├── client/             # React frontend
 │   ├── src/
 │   │   ├── components/ # React components
 │   │   ├── pages/      # Application pages
 │   │   └── utils/      # Utility functions
 │   └── index.html      # Original HTML template
-├── server/             # Express backend (exports for serverless)
+├── server/             # Express backend (development only)
 │   ├── index.ts        # Main server file
 │   ├── routes.ts       # API routes
 │   └── storage.ts      # Data storage layer
 ├── shared/             # Shared types and schemas
 ├── index.html          # Root-level HTML with SEO
-├── vercel.json         # Vercel deployment configuration
-├── .vercelignore       # Files to ignore during deployment
+├── netlify.toml        # Netlify deployment configuration
 └── README.md           # This file
 ```
 

@@ -11,3 +11,5 @@ yarn-error.log*
 coverage/
 .replit
 replit.nix
+server/
+.netlify/
