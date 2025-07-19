@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Play, Pause, Settings, List, Plus, Pen, Trash2, Check } from "lucide-react";
 import { TimePicker } from "@/components/time-picker";
 import { TaskItem } from "@/components/task-item";
+import { DraggableTaskList } from "@/components/draggable-task-list";
 import { TimerDisplay } from "@/components/timer-display";
 import { notificationManager } from "@/utils/notifications";
 import { sessionStorage } from "@/utils/sessionStorage";
@@ -214,21 +215,26 @@ export default function Home() {
       return;
     }
 
-    // Create the main task
-    createTaskMutation.mutate({
+    // Create both the main task and break in one operation to avoid duplicate breaks
+    const mainTask = {
       name: taskName.trim(),
       duration: selectedDuration,
       isInterval: false,
-    });
+    };
 
-    // Automatically add a 5-minute break after the task
-    setTimeout(() => {
-      createTaskMutation.mutate({
-        name: "Break",
-        duration: 5,
-        isInterval: true,
-      });
-    }, 100); // Small delay to ensure proper order
+    const breakTask = {
+      name: "Break",
+      duration: 5,
+      isInterval: true,
+    };
+
+    // Add main task first
+    createTaskMutation.mutate(mainTask, {
+      onSuccess: () => {
+        // Only add break after main task is successfully created
+        createTaskMutation.mutate(breakTask);
+      }
+    });
   };
 
   const handleUpdateTask = (id: number, data: Partial<InsertTask>) => {
@@ -237,6 +243,15 @@ export default function Home() {
 
   const handleDeleteTask = (id: number) => {
     deleteTaskMutation.mutate(id);
+  };
+
+  const handleReorderTasks = (reorderedTasks: Task[]) => {
+    // Update the local state immediately for smooth UX
+    setCachedTasks(reorderedTasks);
+    
+    // TODO: In a real app, you'd send the reordered list to the server
+    // For now, we just update the local cached tasks
+    sessionStorage.saveTasks(reorderedTasks);
   };
 
   const handleClearAllTasks = () => {
@@ -545,18 +560,14 @@ export default function Home() {
                   No tasks yet. Add your first task above!
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {tasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      onUpdate={handleUpdateTask}
-                      onDelete={handleDeleteTask}
-                      isUpdating={updateTaskMutation.isPending}
-                      isDeleting={deleteTaskMutation.isPending}
-                    />
-                  ))}
-                </div>
+                <DraggableTaskList
+                  tasks={tasks}
+                  onUpdate={handleUpdateTask}
+                  onDelete={handleDeleteTask}
+                  onReorder={handleReorderTasks}
+                  isUpdating={updateTaskMutation.isPending}
+                  isDeleting={deleteTaskMutation.isPending}
+                />
               )}
             </Card>
           </div>

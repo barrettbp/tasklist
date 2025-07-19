@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pen, Trash2, Check } from "lucide-react";
+import { Pen, Trash2, Check, GripVertical } from "lucide-react";
 import { TimePicker } from "@/components/time-picker";
 import type { Task, InsertTask } from "@shared/schema";
 
@@ -41,9 +41,7 @@ export function TaskItem({ task, onUpdate, onDelete, isUpdating, isDeleting }: T
   };
 
   const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      onDelete(task.id);
-    }
+    onDelete(task.id);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -79,6 +77,9 @@ export function TaskItem({ task, onUpdate, onDelete, isUpdating, isDeleting }: T
         </div>
       ) : (
         <div className="flex items-center">
+          <div className="mr-3 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing">
+            <GripVertical className="w-4 h-4" />
+          </div>
           <div className="flex-1">
             <div className="font-medium text-gray-900">
               {task.isInterval ? 'Break' : task.name}
