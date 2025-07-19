@@ -6,13 +6,13 @@ This is a full-stack Pomodoro timer application built with React frontend and Ex
 
 ## Recent Changes
 
+- **Serverless deployment ready**: Refactored Express server to export app for Vercel/Netlify deployment
+- **Vercel configuration**: Added vercel.json with proper routing and build configuration
+- **API directory structure**: Created api/index.ts entry point for serverless functions
+- **Production/development separation**: Server only starts in development, exports app for production
+- **Root-level index.html**: Moved index.html to root level with proper SEO meta tags
 - **Session storage persistence**: Tasks and timer state persist across browser refreshes and restarts
 - **Auto-progression**: Tasks automatically advance to next task without manual intervention
-- **Clear all functionality**: "Clear all" link appears when there are 3+ tasks
-- **Improved responsive design**: Enhanced mobile, tablet, and desktop layouts
-- **Better time picker**: Smoother scrolling with throttling and improved touch controls
-- **Root-level index.html**: Moved index.html to root level with proper SEO meta tags
-- **Enhanced button styling**: Updated notification enable button with custom green color
 
 ## User Preferences
 
@@ -93,21 +93,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Deployment Strategy
 
+The application is now configured for serverless deployment with multiple hosting options:
+
 ### Build Process
 1. **Frontend**: Vite builds React app to `dist/public`
-2. **Backend**: ESBuild bundles server code to `dist/index.js`
-3. **Database**: Drizzle pushes schema changes to PostgreSQL
+2. **Backend**: Express app exports for serverless functions
+3. **Database**: Drizzle pushes schema changes to PostgreSQL (optional)
+
+### Serverless Deployment
+- **Vercel**: Uses `vercel.json` and `api/index.ts` entry point
+- **Netlify**: Uses `netlify.toml` and `netlify/functions/api.ts` entry point
+- **Traditional**: Express server can still run standalone
 
 ### Environment Configuration
-- **Development**: Local dev server with HMR
-- **Production**: Express serves static files and API
-- **Database**: CONNECTION_URL environment variable required
+- **Development**: Local dev server with HMR (port 5000)
+- **Production**: Serverless functions handle API, static files served by CDN
+- **Database**: Optional PostgreSQL, defaults to in-memory storage
 
 ### Deployment Commands
 - `npm run dev` - Development with hot reloading
-- `npm run build` - Production build
-- `npm run start` - Production server
-- `npm run db:push` - Deploy database schema
+- `npm run build` - Production build for all platforms
+- `npm start` - Traditional server mode
+- `npm run db:push` - Deploy database schema (optional)
 
 ### Architecture Benefits
 - **Type Safety**: Shared TypeScript schemas between client/server

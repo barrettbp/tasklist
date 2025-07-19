@@ -1,11 +1,7 @@
-import express, { Router } from 'express';
 import serverless from 'serverless-http';
+import app, { getApp } from '../../server/index';
 
-const app = express();
-const router = Router();
+// Ensure app is initialized before creating handler
+const handler = serverless(app);
 
-router.get('/hello', (req, res) => res.json({ message: 'Hello World!' }));
-
-app.use('/api', router);
-
-export const handler = serverless(app);
+export { handler };
