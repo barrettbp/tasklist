@@ -573,6 +573,21 @@ export default function Home() {
         onAddTask={handleAddTask}
         isLoading={createTaskMutation.isPending}
       />
+      
+      {/* Footer Credit */}
+      <div className="text-center py-8">
+        <p className="text-sm text-gray-400">
+          Built by{' '}
+          <a 
+            href="https://www.linkedin.com/in/barrettle/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:text-gray-600 transition-colors"
+          >
+            Barrett Le
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
