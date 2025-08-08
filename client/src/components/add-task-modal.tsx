@@ -36,7 +36,7 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold text-left">Add Task</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-left">Add New Task</DialogTitle>
             <Button
               variant="ghost"
               onClick={handleClose}
