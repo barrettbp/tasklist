@@ -1,0 +1,75 @@
+import { Button } from "@/components/ui/button";
+import { Play, Pause, Trash2 } from "lucide-react";
+import type { Task } from "@shared/schema";
+
+interface ActiveTaskItemProps {
+  task: Task;
+  isActive: boolean;
+  onPlay: () => void;
+  onPause: () => void;
+  onDelete: (id: number) => void;
+  isRunning: boolean;
+  isDeleting: boolean;
+}
+
+export function ActiveTaskItem({ 
+  task, 
+  isActive, 
+  onPlay, 
+  onPause, 
+  onDelete, 
+  isRunning, 
+  isDeleting 
+}: ActiveTaskItemProps) {
+  return (
+    <div className={`flex items-center p-4 rounded-xl border transition-all duration-200 ${
+      isActive 
+        ? 'bg-blue-50 border-blue-200 shadow-sm' 
+        : 'bg-gray-50 border-gray-100'
+    }`}>
+      <div className="flex-1 min-w-0">
+        <div className={`font-medium text-sm ${
+          isActive ? 'text-blue-900' : 'text-gray-700'
+        }`}>
+          {task.isInterval ? 'Break' : task.name}
+        </div>
+        <div className={`text-xs ${
+          isActive ? 'text-blue-600' : 'text-gray-500'
+        }`}>
+          {task.duration} minutes
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2 ml-3">
+        {isActive && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={isRunning ? onPause : onPlay}
+            className={`p-2 rounded-lg ${
+              isRunning 
+                ? 'text-orange-600 hover:bg-orange-50' 
+                : 'text-blue-600 hover:bg-blue-50'
+            }`}
+          >
+            {isRunning ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+          </Button>
+        )}
+        
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => onDelete(task.id)}
+          disabled={isDeleting}
+          className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}

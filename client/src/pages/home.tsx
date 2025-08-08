@@ -3,22 +3,17 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Play, Pause, Settings, List, Plus, Pen, Trash2, Check } from "lucide-react";
-import { TimePicker } from "@/components/time-picker";
-import { TaskItem } from "@/components/task-item";
-import { DraggableTaskList } from "@/components/draggable-task-list";
+import { Play, Pause, Plus } from "lucide-react";
 import { TimerDisplay } from "@/components/timer-display";
+import { AddTaskModal } from "@/components/add-task-modal";
+import { ActiveTaskItem } from "@/components/active-task-item";
 import { notificationManager } from "@/utils/notifications";
 import { sessionStorage } from "@/utils/sessionStorage";
 import type { Task, InsertTask } from "@shared/schema";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"run" | "setup">("run");
-  const [taskName, setTaskName] = useState("");
-  const [selectedDuration, setSelectedDuration] = useState(25);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -107,8 +102,6 @@ export default function Home() {
     },
     onSuccess: (newTask) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      setTaskName("");
-      setSelectedDuration(25);
       toast({ title: "Task added successfully!" });
       
       // Update cached tasks immediately for offline support
@@ -226,18 +219,14 @@ export default function Home() {
     }
   }, [tasks, currentTaskIndex, isRunning, hasStartedTimer]);
 
-  const handleAddTask = () => {
-    if (!taskName.trim()) {
-      toast({ title: "Please enter a task name", variant: "destructive" });
-      return;
-    }
-
+  const handleAddTask = (name: string, duration: number) => {
     // Just create the main task - no automatic breaks
     createTaskMutation.mutate({
-      name: taskName.trim(),
-      duration: selectedDuration,
+      name,
+      duration,
       isInterval: false,
     });
+    setIsModalOpen(false);
   };
 
   const handleUpdateTask = (id: number, data: Partial<InsertTask>) => {
@@ -331,7 +320,7 @@ export default function Home() {
 
   const toggleTimer = () => {
     if (tasks.length === 0) {
-      toast({ title: "Add tasks in Setup tab first", variant: "destructive" });
+      toast({ title: "Add tasks first", variant: "destructive" });
       return;
     }
 
@@ -350,6 +339,14 @@ export default function Home() {
     setIsRunning(!isRunning);
   };
 
+  const handlePlayTask = () => {
+    toggleTimer();
+  };
+
+  const handlePauseTask = () => {
+    setIsRunning(false);
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -359,221 +356,116 @@ export default function Home() {
   const currentTask = tasks[currentTaskIndex];
   const totalTime = currentTask?.duration * 60 || 0;
   const progress = totalTime > 0 ? ((totalTime - timeRemaining) / totalTime) * 100 : 0;
+  const completedTasks = currentTaskIndex;
+  const totalTasks = tasks.length;
 
   return (
-    <div className="bg-ios-gray min-h-screen">
-      {/* Tab Navigation */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-md mx-auto lg:max-w-2xl xl:max-w-4xl">
-          <div className="flex relative">
-            <div 
-              className="absolute bottom-0 left-0 w-1/2 h-0.5 bg-ios-blue transition-transform duration-300"
-              style={{ transform: `translateX(${activeTab === 'setup' ? '100%' : '0%'})` }}
-            />
-            <Button
-              variant="ghost"
-              className={`flex-1 py-4 text-center font-medium rounded-none ${
-                activeTab === 'run' ? 'text-ios-blue' : 'text-ios-secondary'
-              }`}
-              onClick={() => setActiveTab('run')}
-            >
-              <Play className="w-4 h-4 mr-2" />
-              Run
-            </Button>
-            <Button
-              variant="ghost"
-              className={`flex-1 py-4 text-center font-medium rounded-none ${
-                activeTab === 'setup' ? 'text-ios-blue' : 'text-ios-secondary'
-              }`}
-              onClick={() => setActiveTab('setup')}
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Setup
-            </Button>
+    <div className="bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-md mx-auto px-4 py-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Focus Timer</h1>
+            <p className="text-gray-600 text-sm">Stay productive with focused work sessions</p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto p-4 sm:p-6 lg:max-w-2xl xl:max-w-4xl">
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-12">
-        {activeTab === 'run' ? (
-          /* Run View */
-          <div className="lg:col-span-2 xl:col-span-1">
-            {/* Timer Display */}
-            <Card className="p-4 sm:p-8 mb-6 text-center bg-white rounded-2xl shadow-sm">
-              <TimerDisplay 
-                timeRemaining={timeRemaining}
-                progress={progress}
-                currentTask={currentTask}
-              />
-              
-              <div className="flex flex-col items-center space-y-6">
-                <Button
-                  size="lg"
-                  className={`px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform transition-transform active:scale-95 ${
-                    isRunning 
-                      ? 'bg-ios-red hover:bg-ios-red/90 text-white' 
-                      : 'bg-ios-blue hover:bg-ios-blue/90 text-white'
-                  }`}
-                  onClick={toggleTimer}
-                >
-                  {isRunning ? (
-                    <>
-                      <Pause className="w-5 h-5 mr-2" />
-                      Pause
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-5 h-5 mr-2" />
-                      {hasStartedTimer && timeRemaining > 0 ? 'Resume' : 'Play'}
-                    </>
-                  )}
-                </Button>
-                
-                {tasks.length > 0 && (
-                  <button
-                    onClick={handleSkipTask}
-                    className="text-ios-secondary text-sm hover:underline hover:text-gray-700 transition-colors"
-                  >
-                    Skip
-                  </button>
-                )}
-              </div>
-            </Card>
-
-            {/* Task Queue */}
-            <Card className="p-6 bg-white rounded-2xl shadow-sm">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">
-                <List className="inline w-5 h-5 mr-2 text-ios-blue" />
-                Task Queue
-              </h3>
-              
-              {tasks.length === 0 ? (
-                <div className="text-center text-ios-secondary">
-                  No tasks in queue. Add tasks in Setup tab.
-                </div>
+      <div className="max-w-md mx-auto p-4 space-y-6">
+        {/* Timer Display */}
+        <Card className="p-6 text-center bg-white rounded-2xl shadow-sm">
+          <TimerDisplay 
+            timeRemaining={timeRemaining}
+            progress={progress}
+            currentTask={currentTask}
+          />
+          
+          <div className="flex flex-col items-center space-y-4">
+            <Button
+              size="lg"
+              className={`px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform transition-transform active:scale-95 ${
+                isRunning 
+                  ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+              onClick={toggleTimer}
+            >
+              {isRunning ? (
+                <>
+                  <Pause className="w-5 h-5 mr-2" />
+                  Pause
+                </>
               ) : (
-                <div className="space-y-3">
-                  {tasks.map((task, index) => (
-                    <div
-                      key={task.id}
-                      className={`flex items-center p-3 rounded-xl ${
-                        index === currentTaskIndex 
-                          ? 'bg-ios-gray' 
-                          : 'bg-gray-50'
-                      }`}
-                    >
-                      <div 
-                        className={`w-3 h-3 rounded-full mr-4 ${
-                          index === currentTaskIndex 
-                            ? (task.isInterval ? 'bg-ios-green' : 'bg-ios-blue')
-                            : 'bg-gray-300'
-                        }`} 
-                      />
-                      <div className="flex-1">
-                        <div className={`font-medium ${
-                          index === currentTaskIndex 
-                            ? 'text-gray-900' 
-                            : 'text-gray-600'
-                        }`}>
-                          {task.isInterval ? 'Break' : task.name}
-                        </div>
-                        <div className="text-sm text-ios-secondary">
-                          {task.duration} minutes {task.isInterval && '(Break)'}
-                        </div>
-                      </div>
-                      {index === currentTaskIndex && (
-                        <div className="text-xs text-ios-secondary">Current</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <>
+                  <Play className="w-5 h-5 mr-2" />
+                  {hasStartedTimer && timeRemaining > 0 ? 'Resume' : 'Start'}
+                </>
               )}
-            </Card>
+            </Button>
+            
+            {tasks.length > 0 && (
+              <button
+                onClick={handleSkipTask}
+                className="text-gray-500 text-sm hover:underline hover:text-gray-700 transition-colors"
+              >
+                Skip Task
+              </button>
+            )}
           </div>
-        ) : (
-          /* Setup View */
-          <div className="lg:col-span-2 xl:col-span-1">
+        </Card>
 
+        {/* Progress and Add Task */}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            {totalTasks > 0 ? `${completedTasks} of ${totalTasks} completed` : 'No active tasks'}
+          </div>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Task
+          </Button>
+        </div>
 
-            {/* Add Task Form */}
-            <Card className="p-6 mb-6 bg-white rounded-2xl shadow-sm">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">
-                <Plus className="inline w-5 h-5 mr-2 text-ios-blue" />
-                Add New Task
-              </h3>
-              
-              <div className="space-y-6">
-                <div>
-                  <Label className="block text-sm font-medium text-gray-700 mb-2">
-                    Task Name
-                  </Label>
-                  <Input
-                    value={taskName}
-                    onChange={(e) => setTaskName(e.target.value)}
-                    placeholder="Enter task name..."
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ios-blue focus:border-transparent"
-                  />
-                </div>
-                
-                <div>
-                  <Label className="block text-sm font-medium text-gray-700 mb-2">
-                    Duration
-                  </Label>
-                  <TimePicker 
-                    value={selectedDuration}
-                    onChange={setSelectedDuration}
-                  />
-                </div>
-                
-                <Button
-                  onClick={handleAddTask}
-                  className="w-full bg-ios-blue hover:bg-ios-blue/90 text-white py-4 rounded-xl font-semibold text-lg shadow-lg"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Add Task
-                </Button>
-              </div>
-            </Card>
-
-            {/* Task List */}
-            <Card className="p-6 bg-white rounded-2xl shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  <List className="inline w-5 h-5 mr-2 text-ios-blue" />
-                  My Tasks
-                </h3>
-                {tasks.length > 2 && (
-                  <button
-                    onClick={handleClearAllTasks}
-                    className="text-ios-secondary text-sm hover:text-red-600 transition-colors"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </div>
-              
-              {isLoading ? (
-                <div className="text-center text-ios-secondary">Loading tasks...</div>
-              ) : tasks.length === 0 ? (
-                <div className="text-center text-ios-secondary">
-                  No tasks yet. Add your first task above!
-                </div>
-              ) : (
-                <DraggableTaskList
-                  tasks={tasks}
-                  onUpdate={handleUpdateTask}
+        {/* Active Tasks */}
+        <Card className="p-4 bg-white rounded-2xl shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Active Tasks
+          </h3>
+          
+          {isLoading ? (
+            <div className="text-center text-gray-500 py-8">Loading tasks...</div>
+          ) : tasks.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              <p className="mb-2">No tasks yet</p>
+              <p className="text-sm">Add your first task to get started</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {tasks.map((task, index) => (
+                <ActiveTaskItem
+                  key={task.id}
+                  task={task}
+                  isActive={index === currentTaskIndex}
+                  onPlay={handlePlayTask}
+                  onPause={handlePauseTask}
                   onDelete={handleDeleteTask}
-                  onReorder={handleReorderTasks}
-                  isUpdating={updateTaskMutation.isPending}
+                  isRunning={isRunning && index === currentTaskIndex}
                   isDeleting={deleteTaskMutation.isPending}
                 />
-              )}
-            </Card>
-          </div>
-        )}
-        </div>
+              ))}
+            </div>
+          )}
+        </Card>
       </div>
+
+      <AddTaskModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddTask={handleAddTask}
+        isLoading={createTaskMutation.isPending}
+      />
     </div>
   );
 }
