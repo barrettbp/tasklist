@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Clock } from "lucide-react";
+import { motion } from "framer-motion";
 import { AddTaskModal } from "@/components/add-task-modal";
 import { ActiveTaskItem } from "@/components/active-task-item";
 import { notificationManager } from "@/utils/notifications";
@@ -359,37 +360,61 @@ export default function Home() {
   const totalTasks = tasks.length;
 
   return (
-    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 min-h-screen">
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       <div className="max-w-md mx-auto p-4 space-y-6">
         {/* Header */}
-        <div className="text-center pt-6">
-          <h1 className="text-[32px] font-bold text-white mb-2">Focus Timer</h1>
-          <p className="text-[18px] text-white/80 mb-8">Stay productive with focused work sessions</p>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center pt-6"
+        >
+          <h1 className="text-[32px] font-bold text-gray-900 mb-2">Focus Timer</h1>
+          <p className="text-[18px] text-gray-600 mb-8">Stay productive with focused work sessions</p>
+        </motion.div>
+        
         {/* Add Task Button */}
-        <div className="text-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="bg-[#4F46E5] hover:bg-indigo-700 active:bg-purple-700 text-white rounded-lg font-medium text-lg"
+            className="bg-[#4F46E5] hover:bg-indigo-700 active:bg-purple-700 text-white rounded-lg font-medium text-lg shadow-lg"
             style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '12px', paddingBottom: '12px', borderRadius: '0.5rem' }}
           >
             <Plus className="w-5 h-5 mr-2" />
-            Add Task
+            Add New Task
           </Button>
-        </div>
+        </motion.div>
 
         {/* Active Tasks or Empty State */}
         {isLoading ? (
-          <div className="text-center text-white/80 py-8">Loading tasks...</div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center text-gray-600 py-8"
+          >
+            Loading tasks...
+          </motion.div>
         ) : tasks.length === 0 ? (
-          <div className="text-center py-8">
-            <Clock className="w-12 h-12 mx-auto mb-4 text-white/60" />
-            <p className="text-[24px] font-bold text-white mb-2">No tasks yet</p>
-            <p className="text-[18px] text-white/80">Add your first task to get started</p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-8"
+          >
+            <Clock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-[24px] font-bold text-gray-700 mb-2">No tasks yet</p>
+            <p className="text-[18px] text-gray-500">Create your first timed task to get started</p>
+          </motion.div>
         ) : (
-          <Card className="p-4 bg-white rounded-2xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white shadow-2xl"
+          >
+            <h3 className="text-lg font-semibold mb-4">
               Active Tasks
             </h3>
             <div className="space-y-3">
@@ -406,7 +431,7 @@ export default function Home() {
                 />
               ))}
             </div>
-          </Card>
+          </motion.div>
         )}
       </div>
 
