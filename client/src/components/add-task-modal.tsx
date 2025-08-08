@@ -35,7 +35,17 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-left">Add New Task</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-semibold">Add New Task</DialogTitle>
+            <Button
+              variant="ghost"
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              size="sm"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </Button>
+          </div>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
