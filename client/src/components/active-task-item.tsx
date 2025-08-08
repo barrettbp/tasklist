@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Trash2 } from "lucide-react";
+import { Play, Pause, Trash2, SkipForward, RotateCcw } from "lucide-react";
 import type { Task } from "@shared/schema";
 
 interface ActiveTaskItemProps {
@@ -8,6 +8,8 @@ interface ActiveTaskItemProps {
   onPlay: () => void;
   onPause: () => void;
   onDelete: (id: number) => void;
+  onSkip: () => void;
+  onReset: () => void;
   isRunning: boolean;
   isDeleting: boolean;
 }
@@ -18,6 +20,8 @@ export function ActiveTaskItem({
   onPlay, 
   onPause, 
   onDelete, 
+  onSkip, 
+  onReset, 
   isRunning, 
   isDeleting 
 }: ActiveTaskItemProps) {
@@ -45,19 +49,43 @@ export function ActiveTaskItem({
       
       <div className="flex items-center gap-2 ml-3">
         {isActive && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={isRunning ? onPause : onPlay}
-            className="p-2 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 border border-gray-300"
-            style={{ borderRadius: '0.5rem' }}
-          >
-            {isRunning ? (
-              <Pause className="w-4 h-4" />
-            ) : (
-              <Play className="w-4 h-4" />
-            )}
-          </Button>
+          <>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={isRunning ? onPause : onPlay}
+              className="p-2 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 border border-gray-300"
+              style={{ borderRadius: '0.5rem' }}
+            >
+              {isRunning ? (
+                <Pause className="w-4 h-4" />
+              ) : (
+                <Play className="w-4 h-4" />
+              )}
+            </Button>
+            
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onSkip}
+              className="p-2 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 border border-gray-300"
+              style={{ borderRadius: '0.5rem' }}
+              title="Skip current task"
+            >
+              <SkipForward className="w-4 h-4" />
+            </Button>
+            
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onReset}
+              className="p-2 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 border border-gray-300"
+              style={{ borderRadius: '0.5rem' }}
+              title="Reset current task"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+          </>
         )}
         
         <Button

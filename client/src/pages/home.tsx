@@ -234,7 +234,18 @@ export default function Home() {
   };
 
   const handleDeleteTask = (id: number) => {
-    deleteTaskMutation.mutate(id);
+    // Check if task exists in server tasks before attempting delete
+    const taskExistsOnServer = serverTasks.some(task => task.id === id);
+    
+    if (taskExistsOnServer) {
+      deleteTaskMutation.mutate(id);
+    } else {
+      // Task only exists in cache, remove it from cache
+      setCachedTasks(prev => prev.filter(task => task.id !== id));
+      setReorderedTasks(prev => prev ? prev.filter(task => task.id !== id) : null);
+      sessionStorage.saveTasks(tasks.filter(task => task.id !== id));
+      toast({ title: "Task removed from cache" });
+    }
   };
 
   const handleReorderTasks = (newTasks: Task[]) => {
@@ -301,7 +312,7 @@ export default function Home() {
       setTimeRemaining(nextTask?.duration * 60 || 0);
       setIsRunning(false);
       
-      toast({ title: `Skipped: ${completedTask?.name}` });
+      toast({ title: `Skipped: ${completedTask?.isInterval ? 'Break' : completedTask?.name}` });
       
       // Notify about next task
       if (hasNotificationPermission && nextTask) {
@@ -315,6 +326,15 @@ export default function Home() {
       setIsRunning(false);
       setHasStartedTimer(false);
       toast({ title: "All tasks completed!" });
+    }
+  };
+  
+  const handleResetTask = () => {
+    if (tasks.length > 0 && currentTaskIndex < tasks.length) {
+      const currentTask = tasks[currentTaskIndex];
+      setTimeRemaining(currentTask?.duration * 60 || 0);
+      setIsRunning(false);
+      toast({ title: `Reset: ${currentTask?.isInterval ? 'Break' : currentTask?.name}` });
     }
   };
 
@@ -435,6 +455,8 @@ export default function Home() {
                   onPlay={handlePlayTask}
                   onPause={handlePauseTask}
                   onDelete={handleDeleteTask}
+                  onSkip={handleSkipTask}
+                  onReset={handleResetTask}
                   isRunning={isRunning && index === currentTaskIndex}
                   isDeleting={deleteTaskMutation.isPending}
                 />
