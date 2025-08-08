@@ -4,7 +4,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { Plus, Clock } from "lucide-react";
 import { AddTaskModal } from "@/components/add-task-modal";
 import { ActiveTaskItem } from "@/components/active-task-item";
 import { notificationManager } from "@/utils/notifications";
@@ -360,17 +360,12 @@ export default function Home() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-md mx-auto px-4 py-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Focus Timer</h1>
-            <p className="text-gray-600 text-sm">Stay productive with focused work sessions</p>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-md mx-auto p-4 space-y-6">
+        {/* Header */}
+        <div className="text-center pt-6">
+          <h1 className="text-[32px] font-bold text-gray-900 mb-2">Focus Timer</h1>
+          <p className="text-[18px] text-gray-600 mb-8">Stay productive with focused work sessions</p>
+        </div>
         {/* Add Task Button */}
         <div className="text-center">
           <Button
@@ -384,16 +379,19 @@ export default function Home() {
 
         {/* Active Tasks */}
         <Card className="p-4 bg-white rounded-2xl shadow-sm">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">
-            Active Tasks
-          </h3>
+          {tasks.length > 0 && (
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">
+              Active Tasks
+            </h3>
+          )}
           
           {isLoading ? (
             <div className="text-center text-gray-500 py-8">Loading tasks...</div>
           ) : tasks.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
-              <p className="mb-2">No tasks yet</p>
-              <p className="text-sm">Add your first task to get started</p>
+              <Clock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <p className="text-[24px] font-bold text-gray-900 mb-2">No tasks yet</p>
+              <p className="text-[18px] text-gray-600">Add your first task to get started</p>
             </div>
           ) : (
             <div className="space-y-3">
