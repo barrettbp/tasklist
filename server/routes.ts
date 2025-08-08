@@ -1,8 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, type PushSubscription } from "./storage";
 import { insertTaskSchema } from "@shared/schema";
 import { z } from "zod";
+import { NotificationService } from "./notifications";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get all tasks
@@ -89,6 +90,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
+  // Push notification routes
+  
+  // Get VAPID public key
+  app.get("/api/vapid-public-key", (req, res) => {
+    res.json({ publicKey: NotificationService.getVapidPublicKey() });
+  });
+
+  // Subscribe to push notifications
+  app.post("/api/subscribe", async (req, res) => {
+    try {
+      const subscriptionSchema = z.object({
+        endpoint: z.string(),
+        keys: z.object({
+          p256dh: z.string(),
+          auth: z.string()
+        })
+      });
+
+      const subscription = subscriptionSchema.parse(req.body) as PushSubscription;
+      await storage.savePushSubscription(subscription);
+      
+      res.status(201).json({ message: "Subscription saved successfully" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid subscription data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to save subscription" });
+      }
+    }
+  });
+
+  // Send test notification (for testing purposes)
+  app.post("/api/test-notification", async (req, res) => {
+    try {
+      await NotificationService.sendNotificationToAll({
+        title: "Test Notification",
+        body: "This is a test push notification!"
+      });
+      
+      res.json({ message: "Test notification sent" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to send test notification" });
+    }
+  });
+
+  // Notification endpoints for timer events
+  app.post("/api/notify/task-complete", async (req, res) => {
+    try {
+      const { taskName } = req.body;
+      if (!taskName) {
+        return res.status(400).json({ message: "Task name is required" });
+      }
+      
+      await NotificationService.sendTaskCompleteNotification(taskName);
+      res.json({ message: "Task completion notification sent" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to send task completion notification" });
+    }
+  });
+
+  app.post("/api/notify/next-task", async (req, res) => {
+    try {
+      const { taskName } = req.body;
+      if (!taskName) {
+        return res.status(400).json({ message: "Task name is required" });
+      }
+      
+      await NotificationService.sendNextTaskStartedNotification(taskName);
+      res.json({ message: "Next task notification sent" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to send next task notification" });
     }
   });
 

@@ -8,7 +8,7 @@ import { Plus, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { AddTaskModal } from "@/components/add-task-modal";
 import { ActiveTaskItem } from "@/components/active-task-item";
-import { notificationManager } from "@/utils/notifications";
+import { NotificationManager } from "@/components/NotificationManager";
 import { sessionStorage } from "@/utils/sessionStorage";
 import type { Task, InsertTask } from "@shared/schema";
 
@@ -18,28 +18,11 @@ export default function Home() {
   const [isRunning, setIsRunning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [endTime, setEndTime] = useState<number | null>(null);
-  const [hasNotificationPermission, setHasNotificationPermission] = useState(false);
+  const [isPushNotificationEnabled, setIsPushNotificationEnabled] = useState(false);
   const [hasStartedTimer, setHasStartedTimer] = useState(false);
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
-
-  // Check notification permission on mount and request if needed
-  useEffect(() => {
-    const checkAndRequestPermission = async () => {
-      if (notificationManager.isSupported()) {
-        const permission = notificationManager.getPermissionStatus();
-        setHasNotificationPermission(permission === 'granted');
-        
-        // Auto-request permission on first load if not already decided
-        if (permission === 'default') {
-          const newPermission = await notificationManager.requestPermission();
-          setHasNotificationPermission(newPermission === 'granted');
-        }
-      }
-    };
-    checkAndRequestPermission();
-  }, []);
 
   // Fetch tasks with session storage fallback
   const { data: serverTasks = [], isLoading } = useQuery<Task[]>({
@@ -161,7 +144,7 @@ export default function Home() {
   });
 
   // Timer logic - timestamp-based to prevent browser tab throttling
-  const updateTimer = () => {
+  const updateTimer = async () => {
     if (!endTime || !isRunning) return;
     
     const now = Date.now();
@@ -183,15 +166,16 @@ export default function Home() {
       
       toast({ title: `${completedTask?.isInterval ? 'Break' : 'Task'} completed!` });
       
-      // Send browser notification (works even in background)
-      if (hasNotificationPermission && completedTask) {
-        const nextTask = tasks[currentTaskIndex + 1];
+      // Send push notification via server (works even when tab is closed)
+      if (isPushNotificationEnabled && completedTask) {
         const completedTaskName = completedTask.isInterval ? 'Break' : completedTask.name;
-        const nextTaskName = nextTask?.isInterval ? 'Break' : nextTask?.name;
-        notificationManager.showTaskComplete(
-          completedTaskName,
-          nextTaskName
-        );
+        try {
+          await apiRequest("POST", "/api/notify/task-complete", {
+            taskName: completedTaskName
+          });
+        } catch (error) {
+          console.error('Failed to send push notification:', error);
+        }
       }
       
       // Move to next task if available and start automatically
@@ -200,7 +184,7 @@ export default function Home() {
         setCurrentTaskIndex(prev => prev + 1);
         
         // Start next task automatically with timestamp approach
-        setTimeout(() => {
+        setTimeout(async () => {
           const nextDurationMs = (nextTask?.duration || 0) * 60 * 1000;
           const nextEndTime = Date.now() + nextDurationMs;
           setEndTime(nextEndTime);
@@ -208,10 +192,16 @@ export default function Home() {
           setIsRunning(true);
           localStorage.setItem(`timer-${currentTaskIndex + 1}-end`, nextEndTime.toString());
           
-          // Notify about next task start
-          if (hasNotificationPermission && nextTask) {
+          // Send push notification for next task start
+          if (isPushNotificationEnabled && nextTask) {
             const nextTaskName = nextTask.isInterval ? 'Break' : nextTask.name;
-            notificationManager.showTaskStart(nextTaskName);
+            try {
+              await apiRequest("POST", "/api/notify/next-task", {
+                taskName: nextTaskName
+              });
+            } catch (error) {
+              console.error('Failed to send next task notification:', error);
+            }
           }
         }, 100); // Small delay to ensure state updates
         
@@ -238,7 +228,7 @@ export default function Home() {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, endTime, currentTaskIndex, tasks, toast, hasNotificationPermission]);
+  }, [isRunning, endTime, currentTaskIndex, tasks, toast, isPushNotificationEnabled]);
   
   // Handle tab visibility changes - recalculate timer immediately when tab becomes active
   useEffect(() => {
@@ -368,16 +358,6 @@ export default function Home() {
     }
   };
 
-  const handleEnableNotifications = async () => {
-    if (notificationManager.isSupported()) {
-      const permission = await Notification.requestPermission();
-      setHasNotificationPermission(permission === 'granted');
-      if (permission === 'granted') {
-        toast({ title: "Notifications enabled!" });
-      }
-    }
-  };
-
   const handleSkipTask = () => {
     // Clean up current timer
     setIsRunning(false);
@@ -393,10 +373,16 @@ export default function Home() {
       
       toast({ title: `Skipped: ${completedTask?.isInterval ? 'Break' : completedTask?.name}` });
       
-      // Notify about next task
-      if (hasNotificationPermission && nextTask) {
+      // Send push notification for next task
+      if (isPushNotificationEnabled && nextTask) {
         const nextTaskName = nextTask.isInterval ? 'Break' : nextTask.name;
-        notificationManager.showTaskStart(nextTaskName);
+        try {
+          apiRequest("POST", "/api/notify/next-task", {
+            taskName: nextTaskName
+          });
+        } catch (error) {
+          console.error('Failed to send next task notification:', error);
+        }
       }
     } else {
       // Skipping the last task
@@ -437,10 +423,16 @@ export default function Home() {
         setHasStartedTimer(true);
         localStorage.setItem(`timer-${currentTaskIndex}-end`, newEndTime.toString());
         
-        // Notify about task start
-        if (hasNotificationPermission && currentTask) {
+        // Send push notification for task start
+        if (isPushNotificationEnabled && currentTask) {
           const taskName = currentTask.isInterval ? 'Break' : currentTask.name;
-          notificationManager.showTaskStart(taskName);
+          try {
+            apiRequest("POST", "/api/notify/next-task", {
+              taskName: taskName
+            });
+          } catch (error) {
+            console.error('Failed to send task start notification:', error);
+          }
         }
       }
       setIsRunning(true);
@@ -492,6 +484,17 @@ export default function Home() {
           <p className="text-[18px] text-gray-600 mb-8">Stay productive with focused work sessions</p>
         </motion.div>
         
+        {/* Push Notification Settings */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="px-4"
+        >
+          <NotificationManager 
+            onNotificationStateChange={setIsPushNotificationEnabled}
+          />
+        </motion.div>
+
         {/* Add Task Button */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
