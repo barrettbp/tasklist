@@ -22,11 +22,14 @@ export function ActiveTaskItem({
   isDeleting 
 }: ActiveTaskItemProps) {
   return (
-    <div className={`flex items-center p-4 rounded-xl border transition-all duration-200 ${
-      isActive 
-        ? 'bg-blue-50 border-blue-200 shadow-sm' 
-        : 'bg-gray-50 border-gray-100'
-    }`}>
+    <div 
+      className={`flex items-center p-4 border transition-all duration-200 ${
+        isActive 
+          ? 'bg-blue-50 border-blue-200 shadow-sm' 
+          : 'bg-gray-50 border-gray-100'
+      }`}
+      style={{ borderRadius: '0.5rem' }}
+    >
       <div className="flex-1 min-w-0">
         <div className={`font-medium text-sm ${
           isActive ? 'text-blue-900' : 'text-gray-700'
@@ -46,11 +49,12 @@ export function ActiveTaskItem({
             size="sm"
             variant="ghost"
             onClick={isRunning ? onPause : onPlay}
-            className={`p-2 rounded-lg ${
+            className={`p-2 active:bg-[#4F46E5] active:text-white ${
               isRunning 
                 ? 'text-orange-600 hover:bg-orange-50' 
                 : 'text-blue-600 hover:bg-blue-50'
             }`}
+            style={{ borderRadius: '0.5rem' }}
           >
             {isRunning ? (
               <Pause className="w-4 h-4" />
@@ -65,7 +69,8 @@ export function ActiveTaskItem({
           variant="ghost"
           onClick={() => onDelete(task.id)}
           disabled={isDeleting}
-          className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+          className="p-2 text-red-500 hover:bg-red-50 active:bg-[#4F46E5] active:text-white"
+          style={{ borderRadius: '0.5rem' }}
         >
           <Trash2 className="w-4 h-4" />
         </Button>

@@ -370,10 +370,10 @@ export default function Home() {
         <div className="text-center">
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium text-lg"
-            style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '12px', paddingBottom: '12px' }}
+            className="bg-blue-500 hover:bg-blue-600 active:bg-[#4F46E5] text-white rounded-lg font-medium text-lg"
+            style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '12px', paddingBottom: '12px', borderRadius: '0.5rem' }}
           >
-            <Plus className="w-5 h-5" style={{ marginRight: '12px' }} />
+            <Plus className="w-5 h-5 mr-2" />
             Add Task
           </Button>
         </div>

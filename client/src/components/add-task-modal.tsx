@@ -50,7 +50,8 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
               value={taskName}
               onChange={(e) => setTaskName(e.target.value)}
               placeholder="Enter task name"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{ borderRadius: '0.5rem' }}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
               autoFocus
             />
@@ -65,11 +66,12 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
                 <Button
                   key={duration}
                   variant={selectedDuration === duration ? "default" : "outline"}
-                  className={`py-3 text-sm font-medium rounded-lg ${
+                  className={`py-3 text-sm font-medium active:bg-[#4F46E5] ${
                     selectedDuration === duration
                       ? 'bg-blue-500 hover:bg-blue-600 text-white'
                       : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
                   }`}
+                  style={{ borderRadius: '0.5rem' }}
                   onClick={() => setSelectedDuration(duration)}
                 >
                   {duration}m
@@ -82,7 +84,8 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
             <Button
               variant="outline"
               onClick={handleClose}
-              className="flex-1 py-3 text-gray-700 border-gray-200 hover:bg-gray-50 rounded-xl"
+              className="flex-1 py-3 text-gray-700 border-gray-200 hover:bg-gray-50 active:bg-[#4F46E5] active:text-white"
+              style={{ borderRadius: '0.5rem' }}
               disabled={isLoading}
             >
               Cancel
@@ -90,7 +93,8 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
             <Button
               onClick={handleSubmit}
               disabled={!taskName.trim() || isLoading}
-              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium"
+              className="flex-1 bg-blue-500 hover:bg-blue-600 active:bg-[#4F46E5] text-white py-3 font-medium"
+              style={{ borderRadius: '0.5rem' }}
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Task
