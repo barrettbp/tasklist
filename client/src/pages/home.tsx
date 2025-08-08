@@ -359,18 +359,18 @@ export default function Home() {
   const totalTasks = tasks.length;
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 min-h-screen">
       <div className="max-w-md mx-auto p-4 space-y-6">
         {/* Header */}
         <div className="text-center pt-6">
-          <h1 className="text-[32px] font-bold text-gray-900 mb-2">Focus Timer</h1>
-          <p className="text-[18px] text-gray-600 mb-8">Stay productive with focused work sessions</p>
+          <h1 className="text-[32px] font-bold text-white mb-2">Focus Timer</h1>
+          <p className="text-[18px] text-white/80 mb-8">Stay productive with focused work sessions</p>
         </div>
         {/* Add Task Button */}
         <div className="text-center">
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-500 hover:bg-blue-600 active:bg-[#4F46E5] text-white rounded-lg font-medium text-lg"
+            className="bg-[#4F46E5] hover:bg-indigo-700 active:bg-purple-700 text-white rounded-lg font-medium text-lg"
             style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '12px', paddingBottom: '12px', borderRadius: '0.5rem' }}
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -380,12 +380,12 @@ export default function Home() {
 
         {/* Active Tasks or Empty State */}
         {isLoading ? (
-          <div className="text-center text-gray-500 py-8">Loading tasks...</div>
+          <div className="text-center text-white/80 py-8">Loading tasks...</div>
         ) : tasks.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            <Clock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-[24px] font-bold text-gray-900 mb-2">No tasks yet</p>
-            <p className="text-[18px] text-gray-600">Add your first task to get started</p>
+          <div className="text-center py-8">
+            <Clock className="w-12 h-12 mx-auto mb-4 text-white/60" />
+            <p className="text-[24px] font-bold text-white mb-2">No tasks yet</p>
+            <p className="text-[18px] text-white/80">Add your first task to get started</p>
           </div>
         ) : (
           <Card className="p-4 bg-white rounded-2xl shadow-sm">

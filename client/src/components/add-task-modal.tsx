@@ -66,10 +66,10 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
                 <Button
                   key={duration}
                   variant={selectedDuration === duration ? "default" : "outline"}
-                  className={`py-3 text-sm font-medium active:bg-[#4F46E5] ${
+                  className={`py-3 text-sm font-medium ${
                     selectedDuration === duration
-                      ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                      : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                      ? 'bg-[#4F46E5] hover:bg-indigo-700 active:bg-purple-700 text-white'
+                      : 'bg-white hover:bg-gray-50 active:bg-purple-700 active:text-white text-gray-700 border-gray-200'
                   }`}
                   style={{ borderRadius: '0.5rem' }}
                   onClick={() => setSelectedDuration(duration)}
@@ -84,7 +84,7 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
             <Button
               variant="outline"
               onClick={handleClose}
-              className="flex-1 py-3 text-gray-700 border-gray-200 hover:bg-gray-50 active:bg-[#4F46E5] active:text-white"
+              className="flex-1 py-3 text-gray-700 border-gray-200 hover:bg-gray-50 active:bg-purple-700 active:text-white"
               style={{ borderRadius: '0.5rem' }}
               disabled={isLoading}
             >
@@ -93,7 +93,7 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
             <Button
               onClick={handleSubmit}
               disabled={!taskName.trim() || isLoading}
-              className="flex-1 bg-blue-500 hover:bg-blue-600 active:bg-[#4F46E5] text-white py-3 font-medium"
+              className="flex-1 bg-[#4F46E5] hover:bg-indigo-700 active:bg-purple-700 text-white py-3 font-medium"
               style={{ borderRadius: '0.5rem' }}
             >
               <Plus className="w-4 h-4 mr-2" />

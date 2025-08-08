@@ -49,10 +49,10 @@ export function ActiveTaskItem({
             size="sm"
             variant="ghost"
             onClick={isRunning ? onPause : onPlay}
-            className={`p-2 active:bg-[#4F46E5] active:text-white ${
+            className={`p-2 bg-[#4F46E5] text-white hover:bg-indigo-700 active:bg-purple-700 ${
               isRunning 
-                ? 'text-orange-600 hover:bg-orange-50' 
-                : 'text-blue-600 hover:bg-blue-50'
+                ? '' 
+                : ''
             }`}
             style={{ borderRadius: '0.5rem' }}
           >
@@ -69,7 +69,7 @@ export function ActiveTaskItem({
           variant="ghost"
           onClick={() => onDelete(task.id)}
           disabled={isDeleting}
-          className="p-2 text-red-500 hover:bg-red-50 active:bg-[#4F46E5] active:text-white"
+          className="p-2 bg-[#4F46E5] text-white hover:bg-indigo-700 active:bg-purple-700"
           style={{ borderRadius: '0.5rem' }}
         >
           <Trash2 className="w-4 h-4" />
