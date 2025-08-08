@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,9 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-center">Add Task</DialogTitle>
+          <DialogDescription className="text-center text-gray-600">
+            Create a new task with a custom duration
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-4">

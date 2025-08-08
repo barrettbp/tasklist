@@ -4,8 +4,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Play, Pause, Plus } from "lucide-react";
-import { TimerDisplay } from "@/components/timer-display";
+import { Plus } from "lucide-react";
 import { AddTaskModal } from "@/components/add-task-modal";
 import { ActiveTaskItem } from "@/components/active-task-item";
 import { notificationManager } from "@/utils/notifications";
@@ -372,58 +371,13 @@ export default function Home() {
       </div>
 
       <div className="max-w-md mx-auto p-4 space-y-6">
-        {/* Timer Display */}
-        <Card className="p-6 text-center bg-white rounded-2xl shadow-sm">
-          <TimerDisplay 
-            timeRemaining={timeRemaining}
-            progress={progress}
-            currentTask={currentTask}
-          />
-          
-          <div className="flex flex-col items-center space-y-4">
-            <Button
-              size="lg"
-              className={`px-8 py-4 rounded-full text-lg font-semibold shadow-lg transform transition-transform active:scale-95 ${
-                isRunning 
-                  ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                  : 'bg-blue-500 hover:bg-blue-600 text-white'
-              }`}
-              onClick={toggleTimer}
-            >
-              {isRunning ? (
-                <>
-                  <Pause className="w-5 h-5 mr-2" />
-                  Pause
-                </>
-              ) : (
-                <>
-                  <Play className="w-5 h-5 mr-2" />
-                  {hasStartedTimer && timeRemaining > 0 ? 'Resume' : 'Start'}
-                </>
-              )}
-            </Button>
-            
-            {tasks.length > 0 && (
-              <button
-                onClick={handleSkipTask}
-                className="text-gray-500 text-sm hover:underline hover:text-gray-700 transition-colors"
-              >
-                Skip Task
-              </button>
-            )}
-          </div>
-        </Card>
-
-        {/* Progress and Add Task */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            {totalTasks > 0 ? `${completedTasks} of ${totalTasks} completed` : 'No active tasks'}
-          </div>
+        {/* Add Task Button */}
+        <div className="text-center">
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium text-lg"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-5 h-5 mr-2" />
             Add Task
           </Button>
         </div>
