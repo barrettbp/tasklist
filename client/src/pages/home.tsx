@@ -360,7 +360,16 @@ export default function Home() {
   const totalTasks = tasks.length;
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div 
+      className="min-h-screen"
+      style={{
+        background: `
+          radial-gradient(circle at top left, rgba(79, 70, 229, 0.3) 0%, rgba(79, 70, 229, 0.1) 30%, transparent 60%),
+          radial-gradient(circle at bottom right, rgba(147, 51, 234, 0.3) 0%, rgba(147, 51, 234, 0.1) 30%, transparent 60%),
+          #ffffff
+        `
+      }}
+    >
       <div className="max-w-md mx-auto p-4 space-y-6">
         {/* Header */}
         <motion.div 
