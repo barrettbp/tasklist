@@ -19,6 +19,7 @@ export default function Home() {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [hasNotificationPermission, setHasNotificationPermission] = useState(false);
   const [hasStartedTimer, setHasStartedTimer] = useState(false);
+  const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
@@ -75,6 +76,7 @@ export default function Home() {
       setCurrentTaskIndex(savedState.currentTaskIndex || 0);
       setTimeRemaining(savedState.timeRemaining || 0);
       setHasStartedTimer(savedState.hasStartedTimer || false);
+      setCompletedTasksCount(savedState.completedTasksCount || 0);
       // Don't restore running state - user should manually resume
     }
   }, [tasks.length]);
@@ -86,10 +88,11 @@ export default function Home() {
         currentTaskIndex,
         timeRemaining,
         hasStartedTimer,
+        completedTasksCount,
         isRunning: false // Always save as paused
       });
     }
-  }, [currentTaskIndex, timeRemaining, hasStartedTimer]);
+  }, [currentTaskIndex, timeRemaining, hasStartedTimer, completedTasksCount]);
 
   // Create task mutation
   const createTaskMutation = useMutation({
@@ -144,6 +147,12 @@ export default function Home() {
       
       // Update cached tasks immediately for offline support
       setCachedTasks(prev => prev.filter(task => task.id !== deletedId));
+      
+      // If we deleted a completed task, adjust the completed count
+      const deletedTask = tasks.find(t => t.id === deletedId);
+      if (deletedTask && !deletedTask.isInterval && currentTaskIndex > tasks.findIndex(t => t.id === deletedId)) {
+        setCompletedTasksCount(prev => Math.max(0, prev - 1));
+      }
     },
     onError: () => {
       toast({ title: "Failed to delete task", variant: "destructive" });
@@ -159,6 +168,12 @@ export default function Home() {
             // Timer finished
             const completedTask = tasks[currentTaskIndex];
             setIsRunning(false);
+            
+            // Only increment completed count for actual tasks (not breaks)
+            if (completedTask && !completedTask.isInterval) {
+              setCompletedTasksCount(prev => prev + 1);
+            }
+            
             toast({ title: `${completedTask?.isInterval ? 'Break' : 'Task'} completed!` });
             
             // Send browser notification (works even in background)
@@ -241,9 +256,16 @@ export default function Home() {
       deleteTaskMutation.mutate(id);
     } else {
       // Task only exists in cache, remove it from cache
+      const deletedTask = tasks.find(t => t.id === id);
       setCachedTasks(prev => prev.filter(task => task.id !== id));
       setReorderedTasks(prev => prev ? prev.filter(task => task.id !== id) : null);
       sessionStorage.saveTasks(tasks.filter(task => task.id !== id));
+      
+      // If we deleted a completed task, adjust the completed count
+      if (deletedTask && !deletedTask.isInterval && currentTaskIndex > tasks.findIndex(t => t.id === id)) {
+        setCompletedTasksCount(prev => Math.max(0, prev - 1));
+      }
+      
       toast({ title: "Task removed from cache" });
     }
   };
@@ -281,6 +303,7 @@ export default function Home() {
       setTimeRemaining(0);
       setCurrentTaskIndex(0);
       setHasStartedTimer(false);
+      setCompletedTasksCount(0);
       
       // Refresh the task list
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
@@ -447,9 +470,11 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-gray-900">
                 Active Tasks
               </h3>
-              <div className="text-sm text-gray-600">
-                {completedTasks}/{tasks.filter(t => !t.isInterval).length} completed
-              </div>
+              {tasks.filter(t => !t.isInterval).length > 0 && (
+                <div className="text-sm text-gray-600">
+                  {completedTasksCount}/{tasks.filter(t => !t.isInterval).length} completed
+                </div>
+              )}
             </div>
             <div className="space-y-3">
               {tasks.map((task, index) => (
