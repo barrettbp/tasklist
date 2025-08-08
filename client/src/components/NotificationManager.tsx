@@ -48,19 +48,37 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
   const handleEnableNotifications = async () => {
     setIsLoading(true);
     try {
+      console.log('Starting notification setup...');
+      
       // First request permission
       const permission = await notificationManager.requestPermission();
+      console.log('Permission result:', permission);
       
       if (permission !== 'granted') {
-        toast({
-          title: "Permission Denied",
-          description: "Please enable notifications in your browser settings",
-          variant: "destructive"
-        });
+        if (permission === 'denied') {
+          toast({
+            title: "Permission Denied",
+            description: "Please enable notifications in browser settings: Settings → Privacy & Security → Notifications",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Permission Required",
+            description: "Please allow notifications when prompted by your browser",
+            variant: "destructive"
+          });
+        }
+        
+        // Update state to reflect current permission
+        setNotificationState(prev => ({
+          ...prev,
+          permission
+        }));
         return;
       }
 
       // Then subscribe to push notifications
+      console.log('Attempting to subscribe to push notifications...');
       const subscription = await notificationManager.subscribe();
       
       if (subscription) {
@@ -75,10 +93,21 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
           title: "Notifications Enabled",
           description: "You'll now receive push notifications when tasks complete"
         });
+        
+        // Send a test notification to verify it works
+        setTimeout(() => {
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('🎉 Notifications Working!', {
+              body: 'You\'ll now receive notifications when your tasks complete.',
+              icon: '/favicon.ico'
+            });
+          }
+        }, 1000);
+        
       } else {
         toast({
           title: "Subscription Failed",
-          description: "Failed to set up push notifications",
+          description: "Failed to set up push notifications. Check browser console for details.",
           variant: "destructive"
         });
       }
@@ -86,7 +115,7 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
       console.error('Error enabling notifications:', error);
       toast({
         title: "Error",
-        description: "Failed to enable notifications",
+        description: `Failed to enable notifications: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
     } finally {
@@ -182,6 +211,13 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
         </CardTitle>
         <CardDescription>
           Get notified when your timers complete, even when the tab is closed
+          {notificationState.permission === 'denied' && (
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              Notifications are blocked. To enable: <br/>
+              • Chrome/Safari: Click the lock icon → Notifications → Allow <br/>
+              • Firefox: Click the shield icon → Permissions → Allow Notifications
+            </div>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -207,14 +243,33 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
             </Button>
           )}
           
-          {notificationState.isSubscribed && (
+          {notificationState.permission === 'granted' && (
             <Button
               onClick={handleTestNotification}
               variant="secondary"
               className="flex items-center gap-2"
             >
               <TestTube className="w-4 h-4" />
-              Test Notification
+              Test Push
+            </Button>
+          )}
+          
+          {/* Simple browser notification test */}
+          {notificationState.permission === 'granted' && (
+            <Button
+              onClick={() => {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                  new Notification('Browser Test', {
+                    body: 'Simple browser notification working!',
+                    icon: '/favicon.ico'
+                  });
+                }
+              }}
+              variant="secondary"
+              size="sm"
+              className="flex items-center gap-1 text-xs"
+            >
+              Test Browser
             </Button>
           )}
         </div>
@@ -222,6 +277,8 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
         <div className="text-sm text-muted-foreground">
           <p><strong>Status:</strong> {notificationState.permission}</p>
           <p><strong>Subscribed:</strong> {notificationState.isSubscribed ? 'Yes' : 'No'}</p>
+          <p><strong>Service Worker:</strong> {'serviceWorker' in navigator ? 'Supported' : 'Not Supported'}</p>
+          <p><strong>Push Manager:</strong> {'PushManager' in window ? 'Supported' : 'Not Supported'}</p>
         </div>
       </CardContent>
     </Card>

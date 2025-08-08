@@ -62,11 +62,21 @@ class NotificationManager {
 
   async requestPermission(): Promise<NotificationPermission> {
     if (!('Notification' in window)) {
+      console.log('Notifications not supported in this browser');
       return 'denied';
     }
 
+    console.log('Current permission status:', Notification.permission);
+
     if (Notification.permission === 'default') {
-      return await Notification.requestPermission();
+      try {
+        const permission = await Notification.requestPermission();
+        console.log('Permission request result:', permission);
+        return permission;
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        return 'denied';
+      }
     }
 
     return Notification.permission;
