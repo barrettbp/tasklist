@@ -12,6 +12,9 @@ interface ActiveTaskItemProps {
   onReset: () => void;
   isRunning: boolean;
   isDeleting: boolean;
+  progress: number;
+  timeRemaining: number;
+  totalTime: number;
 }
 
 export function ActiveTaskItem({ 
@@ -23,17 +26,32 @@ export function ActiveTaskItem({
   onSkip, 
   onReset, 
   isRunning, 
-  isDeleting 
+  isDeleting,
+  progress,
+  timeRemaining,
+  totalTime
 }: ActiveTaskItemProps) {
   return (
-    <div 
-      className={`flex items-center p-4 transition-all duration-200 shadow-md ${
-        isActive 
-          ? 'bg-blue-50 border-2 border-indigo-500' 
-          : 'bg-white border border-gray-200'
-      }`}
-      style={{ borderRadius: '0.5rem' }}
-    >
+    <div className="relative">
+      {/* Progress bar */}
+      <div 
+        className={`absolute top-0 left-0 h-1 transition-all duration-200 ${
+          isActive ? 'bg-indigo-500' : 'bg-gray-300'
+        }`}
+        style={{ 
+          width: `${progress}%`,
+          borderRadius: '0.25rem 0.25rem 0 0'
+        }}
+      />
+      
+      <div 
+        className={`flex items-center p-4 transition-all duration-200 shadow-md ${
+          isActive 
+            ? 'bg-blue-50 border-2 border-indigo-500' 
+            : 'bg-white border border-gray-200'
+        }`}
+        style={{ borderRadius: '0.5rem' }}
+      >
       <div className="flex-1 min-w-0">
         <div className={`font-medium text-sm ${
           isActive ? 'text-gray-900' : 'text-gray-900'
@@ -99,6 +117,7 @@ export function ActiveTaskItem({
           <Trash2 className="w-4 h-4" />
         </Button>
       </div>
+    </div>
     </div>
   );
 }

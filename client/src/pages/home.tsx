@@ -443,9 +443,14 @@ export default function Home() {
             exit={{ opacity: 0, scale: 0.9 }}
             className="p-6"
           >
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">
-              Active Tasks
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Active Tasks
+              </h3>
+              <div className="text-sm text-gray-600">
+                {completedTasks}/{tasks.filter(t => !t.isInterval).length} completed
+              </div>
+            </div>
             <div className="space-y-3">
               {tasks.map((task, index) => (
                 <ActiveTaskItem
@@ -459,6 +464,9 @@ export default function Home() {
                   onReset={handleResetTask}
                   isRunning={isRunning && index === currentTaskIndex}
                   isDeleting={deleteTaskMutation.isPending}
+                  progress={index === currentTaskIndex ? progress : 0}
+                  timeRemaining={index === currentTaskIndex ? timeRemaining : 0}
+                  totalTime={task.duration * 60}
                 />
               ))}
             </div>
