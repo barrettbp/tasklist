@@ -371,29 +371,27 @@ export default function Home() {
           <Button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium text-lg"
+            style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '12px', paddingBottom: '12px' }}
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <Plus className="w-5 h-5" style={{ marginRight: '12px' }} />
             Add Task
           </Button>
         </div>
 
-        {/* Active Tasks */}
-        <Card className="p-4 bg-white rounded-2xl shadow-sm">
-          {tasks.length > 0 && (
+        {/* Active Tasks or Empty State */}
+        {isLoading ? (
+          <div className="text-center text-gray-500 py-8">Loading tasks...</div>
+        ) : tasks.length === 0 ? (
+          <div className="text-center text-gray-500 py-8">
+            <Clock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-[24px] font-bold text-gray-900 mb-2">No tasks yet</p>
+            <p className="text-[18px] text-gray-600">Add your first task to get started</p>
+          </div>
+        ) : (
+          <Card className="p-4 bg-white rounded-2xl shadow-sm">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">
               Active Tasks
             </h3>
-          )}
-          
-          {isLoading ? (
-            <div className="text-center text-gray-500 py-8">Loading tasks...</div>
-          ) : tasks.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              <Clock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-[24px] font-bold text-gray-900 mb-2">No tasks yet</p>
-              <p className="text-[18px] text-gray-600">Add your first task to get started</p>
-            </div>
-          ) : (
             <div className="space-y-3">
               {tasks.map((task, index) => (
                 <ActiveTaskItem
@@ -408,8 +406,8 @@ export default function Home() {
                 />
               ))}
             </div>
-          )}
-        </Card>
+          </Card>
+        )}
       </div>
 
       <AddTaskModal
