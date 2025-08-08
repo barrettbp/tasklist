@@ -17,6 +17,7 @@ export default function Home() {
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [endTime, setEndTime] = useState<number | null>(null);
   const [hasNotificationPermission, setHasNotificationPermission] = useState(false);
   const [hasStartedTimer, setHasStartedTimer] = useState(false);
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
@@ -159,59 +160,77 @@ export default function Home() {
     },
   });
 
-  // Timer logic - using setInterval for better background tab support
-  useEffect(() => {
-    if (isRunning && timeRemaining > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            // Timer finished
-            const completedTask = tasks[currentTaskIndex];
-            setIsRunning(false);
-            
-            // Only increment completed count for actual tasks (not breaks)
-            if (completedTask && !completedTask.isInterval) {
-              setCompletedTasksCount(prev => prev + 1);
-            }
-            
-            toast({ title: `${completedTask?.isInterval ? 'Break' : 'Task'} completed!` });
-            
-            // Send browser notification (works even in background)
-            if (hasNotificationPermission && completedTask) {
-              const nextTask = tasks[currentTaskIndex + 1];
-              const completedTaskName = completedTask.isInterval ? 'Break' : completedTask.name;
-              const nextTaskName = nextTask?.isInterval ? 'Break' : nextTask?.name;
-              notificationManager.showTaskComplete(
-                completedTaskName,
-                nextTaskName
-              );
-            }
-            
-            // Move to next task if available and start automatically
-            if (currentTaskIndex < tasks.length - 1) {
-              const nextTask = tasks[currentTaskIndex + 1];
-              setCurrentTaskIndex(prev => prev + 1);
-              setTimeRemaining(nextTask?.duration * 60 || 0);
-              setIsRunning(true); // Auto-start next task
-              
-              // Notify about next task start
-              if (hasNotificationPermission && nextTask) {
-                setTimeout(() => {
-                  const nextTaskName = nextTask.isInterval ? 'Break' : nextTask.name;
-                  notificationManager.showTaskStart(nextTaskName);
-                }, 2000); // Delay to not overlap with completion notification
-              }
-            } else {
-              toast({ title: "All tasks completed!" });
-              setCurrentTaskIndex(0);
-              setTimeRemaining(0);
-              setHasStartedTimer(false);
-            }
-            return 0;
+  // Timer logic - timestamp-based to prevent browser tab throttling
+  const updateTimer = () => {
+    if (!endTime || !isRunning) return;
+    
+    const now = Date.now();
+    const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+    
+    setTimeRemaining(remaining);
+    
+    if (remaining <= 0) {
+      // Timer finished
+      const completedTask = tasks[currentTaskIndex];
+      setIsRunning(false);
+      setEndTime(null);
+      localStorage.removeItem(`timer-${currentTaskIndex}-end`);
+      
+      // Only increment completed count for actual tasks (not breaks)
+      if (completedTask && !completedTask.isInterval) {
+        setCompletedTasksCount(prev => prev + 1);
+      }
+      
+      toast({ title: `${completedTask?.isInterval ? 'Break' : 'Task'} completed!` });
+      
+      // Send browser notification (works even in background)
+      if (hasNotificationPermission && completedTask) {
+        const nextTask = tasks[currentTaskIndex + 1];
+        const completedTaskName = completedTask.isInterval ? 'Break' : completedTask.name;
+        const nextTaskName = nextTask?.isInterval ? 'Break' : nextTask?.name;
+        notificationManager.showTaskComplete(
+          completedTaskName,
+          nextTaskName
+        );
+      }
+      
+      // Move to next task if available and start automatically
+      if (currentTaskIndex < tasks.length - 1) {
+        const nextTask = tasks[currentTaskIndex + 1];
+        setCurrentTaskIndex(prev => prev + 1);
+        
+        // Start next task automatically with timestamp approach
+        setTimeout(() => {
+          const nextDurationMs = (nextTask?.duration || 0) * 60 * 1000;
+          const nextEndTime = Date.now() + nextDurationMs;
+          setEndTime(nextEndTime);
+          setTimeRemaining(nextTask?.duration * 60 || 0);
+          setIsRunning(true);
+          localStorage.setItem(`timer-${currentTaskIndex + 1}-end`, nextEndTime.toString());
+          
+          // Notify about next task start
+          if (hasNotificationPermission && nextTask) {
+            const nextTaskName = nextTask.isInterval ? 'Break' : nextTask.name;
+            notificationManager.showTaskStart(nextTaskName);
           }
-          return prev - 1;
-        });
-      }, 1000);
+        }, 100); // Small delay to ensure state updates
+        
+      } else {
+        toast({ title: "All tasks completed!" });
+        setCurrentTaskIndex(0);
+        setTimeRemaining(0);
+        setHasStartedTimer(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isRunning && endTime) {
+      // Update immediately
+      updateTimer();
+      
+      // Set up interval for regular updates
+      timerRef.current = setInterval(updateTimer, 1000);
     }
 
     return () => {
@@ -219,7 +238,40 @@ export default function Home() {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, timeRemaining, currentTaskIndex, tasks, toast, hasNotificationPermission]);
+  }, [isRunning, endTime, currentTaskIndex, tasks, toast, hasNotificationPermission]);
+  
+  // Handle tab visibility changes - recalculate timer immediately when tab becomes active
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isRunning && endTime) {
+        updateTimer();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isRunning, endTime]);
+  
+  // Restore timer from localStorage on mount
+  useEffect(() => {
+    if (tasks.length > 0 && hasStartedTimer) {
+      const storedEndTime = localStorage.getItem(`timer-${currentTaskIndex}-end`);
+      if (storedEndTime) {
+        const endTimeMs = parseInt(storedEndTime);
+        const now = Date.now();
+        
+        if (endTimeMs > now) {
+          // Timer is still running
+          setEndTime(endTimeMs);
+          setTimeRemaining(Math.ceil((endTimeMs - now) / 1000));
+          // Don't auto-resume - let user manually resume if needed
+        } else {
+          // Timer has expired, clean up
+          localStorage.removeItem(`timer-${currentTaskIndex}-end`);
+        }
+      }
+    }
+  }, [tasks.length, hasStartedTimer, currentTaskIndex]);
 
   // Reset timer when tasks change or current task changes (but not when pausing/resuming)
   useEffect(() => {
@@ -327,13 +379,17 @@ export default function Home() {
   };
 
   const handleSkipTask = () => {
+    // Clean up current timer
+    setIsRunning(false);
+    setEndTime(null);
+    localStorage.removeItem(`timer-${currentTaskIndex}-end`);
+    
     if (currentTaskIndex < tasks.length - 1) {
       const completedTask = tasks[currentTaskIndex];
       const nextTask = tasks[currentTaskIndex + 1];
       
       setCurrentTaskIndex(prev => prev + 1);
       setTimeRemaining(nextTask?.duration * 60 || 0);
-      setIsRunning(false);
       
       toast({ title: `Skipped: ${completedTask?.isInterval ? 'Break' : completedTask?.name}` });
       
@@ -346,7 +402,6 @@ export default function Home() {
       // Skipping the last task
       setCurrentTaskIndex(0);
       setTimeRemaining(0);
-      setIsRunning(false);
       setHasStartedTimer(false);
       toast({ title: "All tasks completed!" });
     }
@@ -357,6 +412,8 @@ export default function Home() {
       const currentTask = tasks[currentTaskIndex];
       setTimeRemaining(currentTask?.duration * 60 || 0);
       setIsRunning(false);
+      setEndTime(null);
+      localStorage.removeItem(`timer-${currentTaskIndex}-end`);
       toast({ title: `Reset: ${currentTask?.isInterval ? 'Break' : currentTask?.name}` });
     }
   };
@@ -367,19 +424,30 @@ export default function Home() {
       return;
     }
 
-    if (!isRunning && !hasStartedTimer) {
-      // Starting fresh for the first time
-      setTimeRemaining(tasks[currentTaskIndex]?.duration * 60 || 0);
-      setHasStartedTimer(true);
-      
-      // Notify about task start
-      if (hasNotificationPermission && tasks[currentTaskIndex]) {
-        const taskName = tasks[currentTaskIndex].isInterval ? 'Break' : tasks[currentTaskIndex].name;
-        notificationManager.showTaskStart(taskName);
+    if (!isRunning) {
+      // Starting or resuming timer
+      if (!hasStartedTimer || !endTime) {
+        // Starting fresh for the first time or after reset
+        const currentTask = tasks[currentTaskIndex];
+        const durationMs = (currentTask?.duration || 0) * 60 * 1000;
+        const newEndTime = Date.now() + durationMs;
+        
+        setEndTime(newEndTime);
+        setTimeRemaining(currentTask?.duration * 60 || 0);
+        setHasStartedTimer(true);
+        localStorage.setItem(`timer-${currentTaskIndex}-end`, newEndTime.toString());
+        
+        // Notify about task start
+        if (hasNotificationPermission && currentTask) {
+          const taskName = currentTask.isInterval ? 'Break' : currentTask.name;
+          notificationManager.showTaskStart(taskName);
+        }
       }
+      setIsRunning(true);
+    } else {
+      // Pausing timer - keep endTime in localStorage for resume
+      setIsRunning(false);
     }
-
-    setIsRunning(!isRunning);
   };
 
   const handlePlayTask = () => {
