@@ -87,20 +87,11 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="flex-1 py-3 text-gray-700 border-gray-200 hover:bg-gray-50 active:bg-purple-700 active:text-white"
-              style={{ borderRadius: '0.5rem' }}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
+          <div className="pt-4">
             <Button
               onClick={handleSubmit}
               disabled={!taskName.trim() || isLoading}
-              className="flex-1 bg-[#4F46E5] hover:bg-indigo-700 active:bg-purple-700 text-white py-3 font-medium"
+              className="w-full bg-[#4F46E5] hover:bg-indigo-700 active:bg-purple-700 text-white py-3 font-medium"
               style={{ borderRadius: '0.5rem' }}
             >
               <Plus className="w-4 h-4 mr-2" />
