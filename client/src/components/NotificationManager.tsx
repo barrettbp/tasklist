@@ -274,12 +274,18 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
           )}
         </div>
         
-        <div className="text-sm text-muted-foreground">
-          <p><strong>Status:</strong> {notificationState.permission}</p>
-          <p><strong>Subscribed:</strong> {notificationState.isSubscribed ? 'Yes' : 'No'}</p>
-          <p><strong>Service Worker:</strong> {'serviceWorker' in navigator ? 'Supported' : 'Not Supported'}</p>
-          <p><strong>Push Manager:</strong> {'PushManager' in window ? 'Supported' : 'Not Supported'}</p>
-        </div>
+        {/* Only show debug info if there are issues */}
+        {(notificationState.permission === 'denied' || !notificationState.isSupported) && (
+          <div className="text-sm text-muted-foreground">
+            <p><strong>Status:</strong> {notificationState.permission}</p>
+            {process.env.NODE_ENV === 'development' && (
+              <>
+                <p><strong>Service Worker:</strong> {'serviceWorker' in navigator ? 'Supported' : 'Not Supported'}</p>
+                <p><strong>Push Manager:</strong> {'PushManager' in window ? 'Supported' : 'Not Supported'}</p>
+              </>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
