@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 interface AddTaskModalProps {
   isOpen: boolean;
@@ -35,10 +35,17 @@ export function AddTaskModal({ isOpen, onClose, onAddTask, isLoading = false }: 
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-center">Add Task</DialogTitle>
-          <DialogDescription className="text-center text-gray-600">
-            Create a new task with a custom duration
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-semibold text-left">Add Task</DialogTitle>
+            <Button
+              variant="ghost"
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              size="sm"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </Button>
+          </div>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
