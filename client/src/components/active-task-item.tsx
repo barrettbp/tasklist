@@ -31,6 +31,12 @@ export function ActiveTaskItem({
   timeRemaining,
   totalTime
 }: ActiveTaskItemProps) {
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="relative">
       {/* Progress bar */}
@@ -40,7 +46,10 @@ export function ActiveTaskItem({
         }`}
         style={{ 
           width: `${progress}%`,
-          borderRadius: '0.25rem 0.25rem 0 0'
+          borderTopLeftRadius: '0.5rem',
+          borderTopRightRadius: progress >= 100 ? '0.5rem' : '0',
+          borderBottomLeftRadius: '0',
+          borderBottomRightRadius: '0'
         }}
       />
       
@@ -58,10 +67,17 @@ export function ActiveTaskItem({
         }`}>
           {task.isInterval ? 'Break' : task.name}
         </div>
-        <div className={`text-xs ${
+        <div className={`text-xs flex items-center gap-1 ${
           isActive ? 'text-gray-600' : 'text-gray-600'
         }`}>
-          {task.duration} minutes
+          {isActive && isRunning && (
+            <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+          )}
+          {isActive ? (
+            <span>{formatTime(timeRemaining)} / {task.duration} minutes</span>
+          ) : (
+            <span>{task.duration} minutes</span>
+          )}
         </div>
       </div>
       
