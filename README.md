@@ -4,13 +4,12 @@ A productivity-focused Pomodoro timer application with iPhone-style interface, a
 
 ## Features
 
-- 🍎 iPhone-style time picker with smooth touch controls
+- 🍎 Elegant style time picker with smooth touch controls
 - ⏰ Automatic task progression with 5-minute break intervals
 - 📱 Responsive design for mobile, tablet, and desktop
 - 🔔 Browser push notifications for task completion
 - 💾 Session storage for task persistence across browser refreshes
 - ✏️ Inline task editing with duration adjustment
-- 🎯 Smart task management with clear all functionality
 
 ## Tech Stack
 
