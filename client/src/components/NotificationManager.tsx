@@ -32,9 +32,23 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
     setIsLoading(true);
     try {
       const state = await notificationManager.initialize();
-      setNotificationState(state);
+      // Ensure we have the actual browser permission state
+      const actualPermission = 'Notification' in window ? Notification.permission : 'denied';
+      
+      setNotificationState({
+        ...state,
+        permission: actualPermission
+      });
     } catch (error) {
       console.error('Error initializing notifications:', error);
+      // Set a safe fallback state
+      setNotificationState({
+        permission: 'denied',
+        isSupported: false,
+        isSubscribed: false,
+        subscription: null
+      });
+      
       toast({
         title: "Notification Error",
         description: "Failed to initialize push notifications",
@@ -222,7 +236,7 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-col sm:flex-row gap-2">
-          {!notificationState.isSubscribed || notificationState.permission !== 'granted' ? (
+          {notificationState.permission !== 'granted' || !notificationState.isSubscribed ? (
             <Button
               onClick={handleEnableNotifications}
               disabled={isLoading}
@@ -243,34 +257,34 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
             </Button>
           )}
           
-          {notificationState.permission === 'granted' && (
-            <Button
-              onClick={handleTestNotification}
-              variant="secondary"
-              className="flex items-center gap-2"
-            >
-              <TestTube className="w-4 h-4" />
-              Test Push
-            </Button>
-          )}
-          
-          {/* Simple browser notification test */}
-          {notificationState.permission === 'granted' && (
-            <Button
-              onClick={() => {
-                if ('Notification' in window && Notification.permission === 'granted') {
-                  new Notification('Browser Test', {
-                    body: 'Simple browser notification working!',
-                    icon: '/favicon.ico'
-                  });
-                }
-              }}
-              variant="secondary"
-              size="sm"
-              className="flex items-center gap-1 text-xs"
-            >
-              Test Browser
-            </Button>
+          {/* Only show test buttons when notifications are actually working */}
+          {notificationState.permission === 'granted' && notificationState.isSubscribed && (
+            <>
+              <Button
+                onClick={handleTestNotification}
+                variant="secondary"
+                className="flex items-center gap-2"
+              >
+                <TestTube className="w-4 h-4" />
+                Test Push
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('Browser Test', {
+                      body: 'Simple browser notification working!',
+                      icon: '/favicon.ico'
+                    });
+                  }
+                }}
+                variant="secondary"
+                size="sm"
+                className="flex items-center gap-1 text-xs"
+              >
+                Test Browser
+              </Button>
+            </>
           )}
         </div>
         
