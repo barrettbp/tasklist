@@ -55,10 +55,27 @@ class NotificationManager {
     // Get VAPID public key from server
     try {
       console.log('Fetching VAPID public key...');
-      const response = await fetch('/api/vapid-public-key');
+      
+      // Try Netlify function first, then fallback to Express route for development
+      let response;
+      try {
+        response = await fetch('/.netlify/functions/vapid');
+        console.log('Trying Netlify function endpoint');
+      } catch (netlifyError) {
+        console.log('Netlify function not available, trying Express route');
+        response = await fetch('/api/vapid-public-key');
+      }
+      
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but received: ${contentType}. Response: ${text.substring(0, 200)}`);
+      }
+      
       const { publicKey } = await response.json();
       this.vapidPublicKey = publicKey;
       console.log('VAPID public key retrieved successfully');
@@ -127,13 +144,26 @@ class NotificationManager {
       console.log('Browser subscription successful');
 
       // Send subscription to server
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(subscription)
-      });
+      let response;
+      try {
+        response = await fetch('/.netlify/functions/subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(subscription)
+        });
+        console.log('Using Netlify function for subscription');
+      } catch (netlifyError) {
+        console.log('Netlify function not available, trying Express route');
+        response = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(subscription)
+        });
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to register with server: ${response.status}`);
@@ -181,12 +211,24 @@ class NotificationManager {
 
   async sendTestNotification(): Promise<void> {
     try {
-      const response = await fetch('/api/test-notification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      let response;
+      try {
+        response = await fetch('/.netlify/functions/test-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log('Using Netlify function for test notification');
+      } catch (netlifyError) {
+        console.log('Netlify function not available, trying Express route');
+        response = await fetch('/api/test-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      }
 
       if (response.ok) {
         console.log('Test notification sent');

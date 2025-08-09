@@ -6,12 +6,13 @@ This is a full-stack Pomodoro timer application built with React frontend and Ex
 
 ## Recent Changes
 
-- **Netlify deployment ready**: Optimized for effortless Netlify serverless deployment
-- **Build configuration fixed**: Created vite.config.prod.ts to avoid Replit plugin conflicts
-- **Netlify Functions**: Native serverless function handlers with enhanced error logging
-- **Redirect configuration**: Both netlify.toml redirects and _redirects file for API routing
-- **Debug endpoint**: Added /api/debug for deployment verification
-- **Enhanced build process**: npm ci with dev dependencies and proper file copying
+- **Web Push Notifications**: Complete push notification system with Service Worker implementation
+- **Netlify Functions**: Created `vapid.js`, `subscribe.js`, and `test-notification.js` for serverless deployment
+- **Dual-environment support**: Client automatically detects Netlify vs Express and uses appropriate endpoints
+- **Enhanced error handling**: Detailed logging and user-friendly error messages for notification setup
+- **VAPID key management**: Secure public key distribution via environment variables
+- **Service Worker integration**: Background notifications even when browser tab is closed
+- **Notification permission handling**: Proper browser permission request flow with fallback instructions
 - **Session storage persistence**: Tasks and timer state persist across browser refreshes and restarts
 - **Auto-progression**: Tasks automatically advance to next task without manual intervention
 
@@ -102,10 +103,12 @@ The application is now configured for serverless deployment with multiple hostin
 3. **Database**: Drizzle pushes schema changes to PostgreSQL (optional)
 
 ### Netlify Deployment
-- **Serverless Functions**: Uses `netlify/functions/` directory with TypeScript handlers
+- **Serverless Functions**: Uses `netlify/functions/` directory with JavaScript handlers for push notifications
 - **Static Files**: Frontend built to `dist/public` and served by global CDN
 - **Configuration**: `netlify.toml` handles routing, redirects, and build settings
+- **Environment Variables**: VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY required for push notifications
 - **Development**: Express server runs locally, Netlify functions handle API in production
+- **Web Push**: Dedicated functions for VAPID key distribution, subscription management, and notification sending
 
 ### Environment Configuration
 - **Development**: Local dev server with HMR (port 5000)
