@@ -15,6 +15,7 @@ class NotificationManager {
     const isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
     
     if (!isSupported) {
+      console.log('Push notifications not supported');
       return {
         permission: 'default',
         isSupported: false,
@@ -30,6 +31,17 @@ class NotificationManager {
     try {
       this.registration = await navigator.serviceWorker.register('/service-worker.js');
       console.log('Service Worker registered successfully');
+      
+      // Wait for the service worker to be ready
+      if (this.registration.installing) {
+        await new Promise(resolve => {
+          this.registration!.installing!.addEventListener('statechange', () => {
+            if (this.registration!.installing!.state === 'activated') {
+              resolve(void 0);
+            }
+          });
+        });
+      }
     } catch (error) {
       console.error('Service Worker registration failed:', error);
       return {
@@ -42,11 +54,17 @@ class NotificationManager {
 
     // Get VAPID public key from server
     try {
+      console.log('Fetching VAPID public key...');
       const response = await fetch('/api/vapid-public-key');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       const { publicKey } = await response.json();
       this.vapidPublicKey = publicKey;
+      console.log('VAPID public key retrieved successfully');
     } catch (error) {
       console.error('Failed to get VAPID public key:', error);
+      // Don't fail initialization, just log the error
     }
 
     // Check current subscription
@@ -83,22 +101,33 @@ class NotificationManager {
   }
 
   async subscribe(): Promise<PushSubscription | null> {
-    if (!this.registration || !this.vapidPublicKey) {
-      console.error('Service Worker not registered or VAPID key missing');
-      return null;
+    console.log('Starting subscription process...');
+    console.log('Registration available:', !!this.registration);
+    console.log('VAPID key available:', !!this.vapidPublicKey);
+    
+    if (!this.registration) {
+      console.error('Service Worker not registered');
+      throw new Error('Service Worker not registered. Please try refreshing the page.');
+    }
+    
+    if (!this.vapidPublicKey) {
+      console.error('VAPID key missing');
+      throw new Error('Server configuration error. Please try again later.');
     }
 
     try {
       // Convert VAPID key to Uint8Array
       const applicationServerKey = this.urlBase64ToUint8Array(this.vapidPublicKey);
+      console.log('Converted VAPID key to Uint8Array');
 
       const subscription = await this.registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey
       });
+      console.log('Browser subscription successful');
 
       // Send subscription to server
-      await fetch('/api/subscribe', {
+      const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -106,11 +135,15 @@ class NotificationManager {
         body: JSON.stringify(subscription)
       });
 
-      console.log('Push subscription successful');
+      if (!response.ok) {
+        throw new Error(`Failed to register with server: ${response.status}`);
+      }
+
+      console.log('Server subscription registration successful');
       return subscription;
     } catch (error) {
       console.error('Push subscription failed:', error);
-      return null;
+      throw error; // Re-throw to let the caller handle it
     }
   }
 

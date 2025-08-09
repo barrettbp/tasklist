@@ -93,35 +93,38 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
 
       // Then subscribe to push notifications
       console.log('Attempting to subscribe to push notifications...');
-      const subscription = await notificationManager.subscribe();
       
-      if (subscription) {
-        setNotificationState(prev => ({
-          ...prev,
-          permission,
-          isSubscribed: true,
-          subscription
-        }));
+      try {
+        const subscription = await notificationManager.subscribe();
         
-        toast({
-          title: "Notifications Enabled",
-          description: "You'll now receive push notifications when tasks complete"
-        });
-        
-        // Send a test notification to verify it works
-        setTimeout(() => {
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('🎉 Notifications Working!', {
-              body: 'You\'ll now receive notifications when your tasks complete.',
-              icon: '/favicon.ico'
-            });
-          }
-        }, 1000);
-        
-      } else {
+        if (subscription) {
+          setNotificationState(prev => ({
+            ...prev,
+            permission,
+            isSubscribed: true,
+            subscription
+          }));
+          
+          toast({
+            title: "Notifications Enabled",
+            description: "You'll now receive push notifications when tasks complete"
+          });
+          
+          // Send a test notification to verify it works
+          setTimeout(() => {
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('🎉 Notifications Working!', {
+                body: 'You\'ll now receive notifications when your tasks complete.',
+                icon: '/favicon.ico'
+              });
+            }
+          }, 1000);
+        }
+      } catch (error) {
+        console.error('Subscription error:', error);
         toast({
           title: "Subscription Failed",
-          description: "Failed to set up push notifications. Check browser console for details.",
+          description: error instanceof Error ? error.message : "Failed to set up push notifications",
           variant: "destructive"
         });
       }
