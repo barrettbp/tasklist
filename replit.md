@@ -6,15 +6,15 @@ This is a full-stack Pomodoro timer application built with React frontend and Ex
 
 ## Recent Changes
 
+- **Automatic Break Task Creation Fixed**: Created `tasks.js` Netlify function that includes the same auto-break logic as Express
+- **Dual API Routing**: Client automatically detects deployment environment and routes to Netlify functions or Express
 - **Web Push Notifications**: Complete push notification system with Service Worker implementation
-- **Netlify Functions**: Created `vapid.js`, `subscribe.js`, and `test-notification.js` for serverless deployment
-- **Dual-environment support**: Client automatically detects Netlify vs Express and uses appropriate endpoints
+- **Netlify Functions**: Created `vapid.js`, `subscribe.js`, `test-notification.js`, and `tasks.js` for serverless deployment
+- **Compact Notification UI**: Redesigned notification component as clean 4rem bar with status pills and action buttons
 - **Enhanced error handling**: Detailed logging and user-friendly error messages for notification setup
 - **VAPID key management**: Secure public key distribution via environment variables
 - **Service Worker integration**: Background notifications even when browser tab is closed
-- **Notification permission handling**: Proper browser permission request flow with fallback instructions
 - **Session storage persistence**: Tasks and timer state persist across browser refreshes and restarts
-- **Auto-progression**: Tasks automatically advance to next task without manual intervention
 
 ## User Preferences
 
@@ -49,10 +49,19 @@ Preferred communication style: Simple, everyday language.
 - **Task Structure**: Tasks have isInterval and parentTaskId fields for automatic break generation
 
 ### API Endpoints
+**Development (Express):**
 - `GET /api/tasks` - Retrieve all tasks
-- `POST /api/tasks` - Create a new task
+- `POST /api/tasks` - Create a new task (auto-creates 5min break after)
 - `PATCH /api/tasks/:id` - Update an existing task
 - `DELETE /api/tasks/:id` - Delete a task
+
+**Production (Netlify Functions):**
+- `GET /.netlify/functions/tasks` - Retrieve all tasks
+- `POST /.netlify/functions/tasks` - Create a new task (auto-creates 5min break after)
+- `PATCH /.netlify/functions/tasks/:id` - Update an existing task
+- `DELETE /.netlify/functions/tasks/:id` - Delete a task
+
+*Client automatically detects environment and routes appropriately*
 
 ### Frontend Components
 - **TimerDisplay**: Circular progress timer with iOS-style design and text wrapping

@@ -7,12 +7,36 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Convert Express API routes to Netlify function routes
+function getApiUrl(url: string): string {
+  // Check if we're in a Netlify environment (no server running on specific port)
+  const isNetlify = window.location.hostname.includes('.netlify.app') || 
+                   window.location.hostname.includes('.netlify.dev') ||
+                   !window.location.port;
+  
+  if (isNetlify) {
+    // Convert /api/tasks to /.netlify/functions/tasks
+    if (url.startsWith('/api/tasks')) {
+      return url.replace('/api/tasks', '/.netlify/functions/tasks');
+    }
+    // Handle other API routes that might be added later
+    if (url.startsWith('/api/')) {
+      const endpoint = url.replace('/api/', '');
+      return `/.netlify/functions/${endpoint}`;
+    }
+  }
+  
+  return url; // Return original URL for development
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const apiUrl = getApiUrl(url);
+  
+  const res = await fetch(apiUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -29,7 +53,10 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const url = queryKey.join("/") as string;
+    const apiUrl = getApiUrl(url);
+    
+    const res = await fetch(apiUrl, {
       credentials: "include",
     });
 
