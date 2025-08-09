@@ -34,12 +34,15 @@ class NotificationManager {
       
       // Wait for the service worker to be ready
       if (this.registration.installing) {
+        const installing = this.registration.installing;
         await new Promise(resolve => {
-          this.registration!.installing!.addEventListener('statechange', () => {
-            if (this.registration!.installing!.state === 'activated') {
+          const handleStateChange = () => {
+            if (installing.state === 'activated') {
+              installing.removeEventListener('statechange', handleStateChange);
               resolve(void 0);
             }
-          });
+          };
+          installing.addEventListener('statechange', handleStateChange);
         });
       }
     } catch (error) {

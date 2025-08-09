@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bell, BellOff, TestTube } from 'lucide-react';
+import { Bell, BellOff } from 'lucide-react';
 import { notificationManager, type NotificationState } from '@/lib/notifications';
 import { useToast } from '@/hooks/use-toast';
 
@@ -192,107 +191,58 @@ export function NotificationManager({ onNotificationStateChange }: NotificationM
     }
   };
 
-  if (!notificationState.isSupported) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BellOff className="w-5 h-5" />
-            Notifications Not Supported
-          </CardTitle>
-          <CardDescription>
-            Your browser doesn't support push notifications
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
   const getStatusBadge = () => {
-    if (notificationState.permission === 'granted' && notificationState.isSubscribed) {
-      return <Badge variant="default" className="bg-green-500">Enabled</Badge>;
-    } else if (notificationState.permission === 'denied') {
-      return <Badge variant="destructive">Blocked</Badge>;
-    } else {
-      return <Badge variant="secondary">Disabled</Badge>;
+    if (!notificationState.isSupported) {
+      return <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">Not Supported</Badge>;
     }
+    
+    if (notificationState.permission === 'granted' && notificationState.isSubscribed) {
+      return <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400">Connected</Badge>;
+    }
+    
+    if (notificationState.permission === 'denied') {
+      return <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400">Blocked</Badge>;
+    }
+    
+    return <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">Disabled</Badge>;
   };
 
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="w-5 h-5" />
-          Push Notifications
-          {getStatusBadge()}
-        </CardTitle>
-        <CardDescription>
-          Get notified when your timers complete, even when the tab is closed
-          {notificationState.permission === 'denied' && (
-            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-              Notifications are blocked. To enable: <br/>
-              • Chrome/Safari: Click the lock icon → Notifications → Allow <br/>
-              • Firefox: Click the shield icon → Permissions → Allow Notifications
-            </div>
-          )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-2">
-          {notificationState.permission !== 'granted' || !notificationState.isSubscribed ? (
-            <Button
-              onClick={handleEnableNotifications}
-              disabled={isLoading}
-              className="flex items-center gap-2"
-            >
-              <Bell className="w-4 h-4" />
-              Enable Notifications
-            </Button>
-          ) : (
-            <Button
-              onClick={handleDisableNotifications}
-              disabled={isLoading}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <BellOff className="w-4 h-4" />
-              Disable Notifications
-            </Button>
-          )}
-          
-          {/* Only show test buttons when notifications are actually working */}
-          {notificationState.permission === 'granted' && notificationState.isSubscribed && (
-            <>
-              <Button
-                onClick={handleTestNotification}
-                variant="secondary"
-                className="flex items-center gap-2"
-              >
-                <TestTube className="w-4 h-4" />
-                Test Push
-              </Button>
-              
-              <Button
-                onClick={() => {
-                  if ('Notification' in window && Notification.permission === 'granted') {
-                    new Notification('Browser Test', {
-                      body: 'Simple browser notification working!',
-                      icon: '/favicon.ico'
-                    });
-                  }
-                }}
-                variant="secondary"
-                size="sm"
-                className="flex items-center gap-1 text-xs"
-              >
-                Test Browser
-              </Button>
-            </>
-          )}
-        </div>
-        
+  const isEnabled = notificationState.permission === 'granted' && notificationState.isSubscribed;
 
-      </CardContent>
-    </Card>
+  return (
+    <div className="flex items-center justify-between px-4 py-3 h-16 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg">
+      {/* Left side: Bell icon, text, and status */}
+      <div className="flex items-center gap-3">
+        <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          Notifications
+        </span>
+        {getStatusBadge()}
+      </div>
+
+      {/* Right side: Enable/Disable button */}
+      <div>
+        {!isEnabled ? (
+          <Button
+            onClick={handleEnableNotifications}
+            disabled={isLoading || !notificationState.isSupported}
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            Enable
+          </Button>
+        ) : (
+          <Button
+            onClick={handleDisableNotifications}
+            disabled={isLoading}
+            size="sm"
+            variant="outline"
+            className="text-gray-600 border-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-900"
+          >
+            Disable
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
