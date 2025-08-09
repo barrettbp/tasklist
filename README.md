@@ -1,6 +1,6 @@
 # Taskmodoro - Pomodoro Timer Application v 1.2
 
-A productivity-focused Pomodoro timer application with iPhone-style interface, automatic task sequencing, and smart break intervals for enhanced focus and time management.
+A productivity-focused Pomodoro timer application with sleek interface, automatic task sequencing, and smart break intervals for enhanced focus and time management.
 
 ## Features
 
