@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>NL Wilson Movers — UX, UI & SEO Audit</title>
+<meta name="description" content="UX, UI and SEO audit of NL Wilson Moving & Storage, including navigation, information architecture and page-level recommendations." />
+<style>
+:root{--bg:#f6f7f4;--surface:#fff;--surface2:#f0f2ee;--ink:#17201c;--muted:#66706b;--line:#dfe4df;--accent:#164f3b;--accent2:#dff0e6;--warn:#8f4d00;--warnbg:#fff0d6;--critical:#9e2929;--criticalbg:#fde8e8;--blue:#2c5d86;--bluebg:#eaf2fb;--shadow:0 8px 30px rgba(20,42,32,.08);--radius:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.58}.layout{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid var(--line);background:#fbfcfa;overflow:auto}.brand{padding:8px 10px 18px;border-bottom:1px solid var(--line);margin-bottom:14px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--accent)}.brand h1{font-size:18px;line-height:1.2;margin:7px 0 6px}.brand p{font-size:12px;color:var(--muted);margin:0}.nav-group{margin:18px 0}.nav-label{font-size:10px;font-weight:800;color:#89918d;text-transform:uppercase;letter-spacing:.13em;padding:0 10px 7px}.nav a{display:block;padding:9px 10px;border-radius:10px;color:#4d5752;text-decoration:none;font-size:13px;font-weight:650;margin:2px 0}.nav a:hover{background:var(--surface2);color:var(--ink)}.nav a.active{background:var(--accent2);color:var(--accent)}.sidebar-foot{padding:12px 10px;color:#8a938e;font-size:11px}.content{min-width:0;padding:0 44px 80px}.hero{max-width:1080px;margin:0 auto;padding:62px 0 28px}.hero h2{font-size:clamp(38px,6vw,76px);line-height:.98;letter-spacing:-.045em;margin:14px 0 22px;max-width:900px}.hero .lede{font-size:20px;color:#58625d;max-width:780px}.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}.pill{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700;color:#53605a}.pill strong{color:var(--accent)}.section{max-width:1080px;margin:0 auto;padding:56px 0;border-top:1px solid var(--line);scroll-margin-top:20px}.section h2{font-size:34px;line-height:1.1;letter-spacing:-.025em;margin:0 0 10px}.section-intro{color:var(--muted);font-size:17px;max-width:820px;margin:0 0 28px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 1px 0 rgba(0,0,0,.01)}.card h3{font-size:17px;margin:0 0 8px}.card p{margin:0;color:#58635d}.score{display:flex;align-items:center;justify-content:space-between;gap:16px}.score b{font-size:28px}.tag{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}.critical{background:var(--criticalbg);color:var(--critical)}.high{background:var(--warnbg);color:var(--warn)}.medium{background:var(--bluebg);color:var(--blue)}.win{background:var(--accent2);color:var(--accent)}.quick{counter-reset:quick;display:grid;gap:12px}.quick .item{counter-increment:quick;display:grid;grid-template-columns:52px 1fr auto;gap:16px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}.quick .item:before{content:counter(quick);display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--accent);color:white;font-weight:850}.quick h3{margin:2px 0 5px;font-size:17px}.quick p{margin:0;color:var(--muted)}.callout{background:#183126;color:#eef7f1;border-radius:22px;padding:28px;margin:22px 0}.callout h3{margin:0 0 10px;font-size:24px}.callout p{color:#c9dad1;margin:0}.quote{border-left:3px solid var(--accent);padding:2px 0 2px 16px;color:#47534d;font-weight:650;margin:14px 0}.issues{display:grid;gap:10px;margin-top:18px}.issue{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;padding:14px 15px;background:var(--surface);border:1px solid var(--line);border-radius:13px}.issue .dot{width:9px;height:9px;border-radius:50%;margin-top:7px;background:var(--accent)}.issue b{display:block;margin-bottom:2px}.issue span{color:var(--muted);font-size:14px}.ia{background:#101814;color:#e8efeb;border-radius:20px;padding:24px;overflow:auto;font:13px/1.72 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;white-space:pre}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}table{width:100%;border-collapse:collapse;min-width:640px}th,td{text-align:left;padding:13px 15px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6f7974;background:#fafbf9}tr:last-child td{border-bottom:0}.page-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:22px}.page-link{white-space:nowrap;color:var(--accent);font-weight:750;text-decoration:none;font-size:13px;border:1px solid #bad4c6;background:#edf8f1;padding:8px 11px;border-radius:10px}.page-link:hover{background:#e3f3e9}.split{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.subhead{font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);margin:26px 0 10px}.bullets{padding-left:19px;margin:8px 0;color:#4f5a54}.bullets li{margin:7px 0}.footer{max-width:1080px;margin:0 auto;border-top:1px solid var(--line);padding:30px 0 50px;color:#818a85;font-size:12px}.mobile-top{display:none}.mobile-toggle{border:1px solid var(--line);background:white;border-radius:10px;padding:8px 10px;font-weight:800}.overlay{display:none}
+@media(max-width:980px){.layout{display:block}.sidebar{position:fixed;z-index:40;left:0;top:0;width:290px;transform:translateX(-105%);transition:.2s ease;box-shadow:var(--shadow)}body.menu-open .sidebar{transform:none}.overlay{position:fixed;inset:0;background:rgba(10,18,14,.32);z-index:30}body.menu-open .overlay{display:block}.mobile-top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(246,247,244,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.mobile-top b{font-size:13px}.content{padding:0 22px 60px}.hero{padding-top:42px}.grid,.grid3,.split{grid-template-columns:1fr}.quick .item{grid-template-columns:48px 1fr}.quick .item .tag{grid-column:2;width:max-content}.page-head{display:block}.page-link{display:inline-block;margin-top:8px}.section{padding:44px 0}}
+@media(max-width:560px){.content{padding-left:16px;padding-right:16px}.hero h2{font-size:42px}.section h2{font-size:28px}.card{padding:18px}.quick .item{padding:15px}.hero .lede{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="mobile-top"><b>NL Wilson Audit</b><button class="mobile-toggle" aria-label="Open navigation" onclick="document.body.classList.toggle('menu-open')">☰ Browse</button></div>
+<div class="overlay" onclick="document.body.classList.remove('menu-open')"></div>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand"><div class="eyebrow">Bearplus Web Audit</div><h1>NL Wilson Movers</h1><p>UX · UI · SEO · Information Architecture</p></div>
+  <nav class="nav">
+    <div class="nav-group"><div class="nav-label">Executive audit</div>
+      <a href="#first-impression">First impression</a>
+      <a href="#quick-wins">Top 5 quick wins</a>
+      <a href="#sitewide">Sitewide UX / UI</a>
+      <a href="#ia">Header, sitemap & IA</a>
+      <a href="#seo">SEO priorities</a>
+    </div>
+    <div class="nav-group"><div class="nav-label">Page audits</div>
+      <a href="#long-term">Long-Term Storage</a>
+      <a href="#cleaning">Cleaning Services</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-group"><div class="nav-label">Next steps</div><a href="#roadmap">90-day roadmap</a></div>
+  </nav>
+  <div class="sidebar-foot">Audit prepared from a live-site review of nlwilsonmovers.com.</div>
+</aside>
+<main class="content">
+<section class="hero">
+  <div class="eyebrow">UX · UI · SEO Audit</div>
+  <h2>Good local foundations. The biggest gains now come from clarity and quality control.</h2>
+  <p class="lede">NL Wilson already has the trust signals, service breadth and local-market history needed to convert. The bigger opportunity is to make the site feel intentionally structured instead of template-driven.</p>
+  <div class="meta"><span class="pill"><strong>Focus:</strong> conversion UX</span><span class="pill"><strong>Focus:</strong> IA & navigation</span><span class="pill"><strong>Focus:</strong> local SEO</span><span class="pill">Reviewed Sep 2026</span></div>
+</section>
+
+<section id="first-impression" class="section">
+  <h2>First impression</h2>
+  <p class="section-intro">The site communicates legitimacy quickly, but inconsistency in page content and structure undermines the trust those signals create.</p>
+  <div class="grid3">
+    <div class="card"><div class="score"><h3>Trust foundation</h3><b>Strong</b></div><p>Years in business, phone visibility, Bekins affiliation, regulatory information and geographic relevance are all useful conversion signals.</p></div>
+    <div class="card"><div class="score"><h3>Information clarity</h3><b>Mixed</b></div><p>Services are easy to discover, but navigation mixes services, resources and specialties in ways that make the hierarchy harder to understand.</p></div>
+    <div class="card"><div class="score"><h3>Content QA</h3><b>Risk</b></div><p>Template mismatches and city-name errors are more damaging than a lack of content because they directly weaken trust and local relevance.</p></div>
+  </div>
+  <div class="callout"><h3>The central finding</h3><p>The site does not need “more SEO copy” first. It needs stronger information architecture, consistent conversion patterns and a systematic QA pass across service and location templates.</p></div>
+  <div class="issues">
+    <div class="issue"><i class="dot"></i><div><b>Storage content mismatch</b><span>Storage pages contain copy describing long-distance moving, indicating template leakage between services.</span></div></div>
+    <div class="issue"><i class="dot"></i><div><b>Location-page mismatch</b><span>Some city pages reference other cities, which creates immediate credibility and local SEO problems.</span></div></div>
+    <div class="issue"><i class="dot"></i><div><b>Typos in high-intent areas</b><span>Errors such as “Shot-Term Storage” reduce polish precisely where prospects are deciding whether to trust the company.</span></div></div>
+  </div>
+</section>
+
+<section id="quick-wins" class="section">
+  <h2>Top 5 quick fixes that win big</h2>
+  <p class="section-intro">These changes deliver the most leverage without requiring a complete redesign.</p>
+  <div class="quick">
+    <div class="item"><div><h3>Run a site-wide content and template QA pass</h3><p>Audit every indexable service and city page for wrong city names, wrong service descriptions, broken template variables, duplicated sections and title/H1 errors.</p></div><span class="tag critical">Critical</span></div>
+    <div class="item"><div><h3>Rebuild the header around user intent</h3><p>Separate Moving, Storage, Cleaning, Service Areas and Resources. Move educational content out of the Moving menu and expose Service Areas in primary navigation.</p></div><span class="tag high">High impact</span></div>
+    <div class="item"><div><h3>Standardize the primary conversion action</h3><p>Use one sitewide primary CTA: “Get a Free Quote.” Pair it consistently with “Call (913) 357-5330.” Avoid multiple names for the same action.</p></div><span class="tag win">Quick win</span></div>
+    <div class="item"><div><h3>Turn Pricing into a decision-support page</h3><p>Explicitly label hourly units, minimums and surcharges. Add “what’s included,” example calculations and a clear path to an exact quote.</p></div><span class="tag high">High impact</span></div>
+    <div class="item"><div><h3>Make Contact a real conversion landing page</h3><p>Add a strong H1, form context, phone, hours, service area, trust signals and a simple “what happens next” sequence to reduce uncertainty.</p></div><span class="tag win">Quick win</span></div>
+  </div>
+</section>
+
+<section id="sitewide" class="section">
+  <h2>Sitewide UX / UI audit</h2>
+  <p class="section-intro">The visual foundation is workable. The main experience issue is that repeated components do not consistently help users scan, compare or decide.</p>
+  <div class="grid">
+    <div class="card"><span class="tag high">Navigation</span><h3>Too many sibling choices under Moving</h3><p>Nine items under one parent creates a flat menu. Group specialty moving separately and move Packing Tips / Checklist into Resources.</p></div>
+    <div class="card"><span class="tag win">Labels</span><h3>Use self-explanatory menu labels</h3><p>“Residential,” “Apartment,” “Commercial” and “Gun Safe” should become “Residential Moving,” “Apartment & Condo Moving,” “Commercial & Office Moving,” and “Gun Safe Moving.”</p></div>
+    <div class="card"><span class="tag medium">Visual scanning</span><h3>Repeated generic imagery makes cards blend together</h3><p>When multiple service cards use the same truck illustration, users lose the visual cues that help them skim. Use service-specific imagery or icons.</p></div>
+    <div class="card"><span class="tag high">Social proof</span><h3>Testimonials should match page intent</h3><p>Use a long-distance testimonial on Long Distance, a storage testimonial on Storage, and a cleaning testimonial on Cleaning instead of recycling the same few quotes everywhere.</p></div>
+    <div class="card"><span class="tag medium">Orientation</span><h3>Add breadcrumbs to deep pages</h3><p>Patterns like Home → Storage → Long-Term Storage improve orientation, internal linking and hierarchy signals for search engines.</p></div>
+    <div class="card"><span class="tag high">Mobile conversion</span><h3>Keep the two primary actions persistently accessible</h3><p>On mobile, a sticky bottom bar for “Call” and “Get Free Quote” would reduce friction on high-intent service pages.</p></div>
+  </div>
+</section>
+
+<section id="ia" class="section">
+  <h2>Header, sitemap & information architecture</h2>
+  <p class="section-intro">The current structure exposes many pages, but the conceptual model is not as clear as the business itself. Reorganize around service category, geography and resources.</p>
+  <div class="split">
+    <div class="card"><h3>Recommended primary navigation</h3><ul class="bullets"><li><b>Moving Services</b></li><li><b>Storage</b></li><li><b>Cleaning</b></li><li><b>Service Areas</b></li><li><b>Pricing</b></li><li><b>Resources</b></li><li><b>About</b></li><li><b>Contact</b></li></ul><p>Keep <b>Get a Free Quote</b> visually distinct from navigation.</p></div>
+    <div class="card"><h3>Why Service Areas deserves a top-level home</h3><p>NL Wilson already has multiple city landing pages, but geographic discovery is underrepresented in the primary navigation. A Service Areas hub improves user discovery, internal linking and the crawl path into local pages.</p><div class="subhead">Sitemap UX</div><p>Keep <code>/sitemap.xml</code> for search engines, but if the footer says “Sitemap,” point humans to a real HTML sitemap that groups services, locations, resources and company pages.</p></div>
+  </div>
+  <div class="subhead">Recommended hierarchy</div>
+  <div class="ia">/
+├── moving-services/
+│   ├── local-moving/
+│   ├── residential/
+│   ├── apartment-condo/
+│   ├── commercial/
+│   ├── long-distance/
+│   ├── loading-unloading/
+│   ├── gun-safe-moving/
+│   └── vehicle-relocation/
+│
+├── storage-services/
+│   ├── short-term/
+│   ├── long-term/
+│   └── climate-controlled/
+│
+├── cleaning-services/
+│   ├── move-in-move-out/
+│   ├── deep-cleaning/
+│   ├── organization/
+│   └── recurring-cleaning/
+│
+├── service-areas/
+│   ├── olathe-ks/
+│   ├── overland-park-ks/
+│   ├── lenexa-ks/
+│   ├── shawnee-ks/
+│   ├── lawrence-ks/
+│   └── ...
+│
+├── pricing/
+├── resources/
+│   ├── moving-checklist/
+│   ├── packing-tips/
+│   └── blog/
+├── about/
+└── contact/</div>
+  <p style="color:var(--muted);margin-top:14px">This can be implemented as a navigation and internal-linking model without changing every existing URL. Avoid unnecessary URL migrations unless there is a clear SEO reason.</p>
+</section>
+
+<section id="seo" class="section">
+  <h2>SEO priorities</h2>
+  <p class="section-intro">The highest-value SEO work is structural and quality-focused, not publishing volume.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Priority</th><th>What to do</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag critical">1</span></td><td>Fix incorrect / duplicated city and service content.</td><td>Protects trust and strengthens page-level relevance.</td></tr>
+      <tr><td><span class="tag high">2</span></td><td>Normalize titles, H1s and template metadata.</td><td>Removes avoidable crawl and snippet-quality problems.</td></tr>
+      <tr><td><span class="tag high">3</span></td><td>Improve navigation and internal linking.</td><td>Helps both users and crawlers understand page relationships.</td></tr>
+      <tr><td><span class="tag high">4</span></td><td>Create a Service Areas hub and stronger location clusters.</td><td>Makes local landing pages discoverable and contextually linked.</td></tr>
+      <tr><td><span class="tag medium">5</span></td><td>Add / verify BreadcrumbList, LocalBusiness / Organization and relevant Service schema.</td><td>Improves machine-readable entity and hierarchy signals.</td></tr>
+      <tr><td><span class="tag medium">6</span></td><td>Strengthen existing location pages with genuinely local information.</td><td>Reduces doorway-page/template risk and improves usefulness.</td></tr>
+      <tr><td><span class="tag medium">7</span></td><td>Publish more editorial content only after the above.</td><td>Prevents spreading effort across more URLs before core pages are strong.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><h3>Local SEO quality rule</h3><p>For city landing pages, quality is more important than count. Add neighborhoods, local move scenarios, city-specific FAQs, real jobs / photos, nearby-area links and local testimonials before creating more city pages.</p></div>
+</section>
+
+<section id="long-term" class="section">
+  <div class="page-head"><div><div class="eyebrow">Page audit</div><h2>Long-Term Storage</h2><p class="section-intro">Good targeting and use-case coverage, but the service model needs to be explained more explicitly.</p></div><a class="page-link" href="https://www.nlwilsonmovers.com/storage-services/long-term" target="_blank" rel="noopener">Open live page ↗</a></div>
+  <div class="grid">
+    <div class="card"><span class="tag win">Working</span><h3>Clear service intent</h3><p>The page is strongly targeted to long-term storage in Olathe and makes the full-service pickup / storage model more tangible than generic self-storage content.</p></div>
+    <div class="card"><span class="tag win">Working</span><h3>Useful audience segmentation</h3><p>Use cases such as job relocation, military families, antiques, inventory, downsizing and college storage map the service to real customer situations.</p></div>
+  </div>
+  <div class="subhead">Improve next</div>
+  <div class="issues">
+    <div class="issue"><i class="dot"></i><div><b>Explain the process visually</b><span>Use a simple four-step flow: We pack → We pick up → We store → We redeliver.</span></div></div>
+    <div class="issue"><i class="dot"></i><div><b>Answer access questions</b><span>Add FAQs for item access, notice requirements, billing, minimum duration, prohibited items and partial retrieval.</span></div></div>
+    <div class="issue"><i class="dot"></i><div><b>Separate market benchmarks from NL Wilson pricing</b><span>If the page mentions typical self-storage prices, label them as market context so prospects do not mistake them for full-service storage quotes.</span></div></div>
+    <div class="issue"><i class="dot"></i><div><b>Add a short-term vs long-term comparison</b><span>A compact table will improve decision-making and create a strong internal link to the short-term product.</span></div></div>
+  </div>
+</section>
+
+<section id="cleaning" class="section">
+  <div class="page-head"><div><div class="eyebrow">Page audit</div><h2>Cleaning Services</h2><p class="section-intro">Strong service breadth, but package naming and multiple search intents make comparison harder than it needs to be.</p></div><a class="page-link" href="https://www.nlwilsonmovers.com/cleaning-services" target="_blank" rel="noopener">Open live page ↗</a></div>
+  <div class="grid">
+    <div class="card"><span class="tag win">Working</span><h3>More depth than a typical cleaning page</h3><p>The page covers move cleaning, recurring cleaning, organization and specialty needs, creating several potential entry points into the service.</p></div>
+    <div class="card"><span class="tag high">Friction</span><h3>Package names require too much interpretation</h3><p>Creative names have personality, but users must read paragraphs to understand differences. The package comparison should be immediately scannable.</p></div>
+  </div>
+  <div class="subhead">Recommended comparison pattern</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Package</th><th>Best for</th><th>Core scope</th><th>Deep clean</th></tr></thead>
+    <tbody><tr><td>Key to Key</td><td>Move-in / move-out</td><td>Custom turnover clean</td><td>Optional</td></tr><tr><td>Sparkle & Shine</td><td>Maintenance</td><td>Surfaces + floors</td><td>—</td></tr><tr><td>Deep Dive</td><td>Deep cleaning</td><td>Baseboards, fans, detail work</td><td>Yes</td></tr><tr><td>Home Revival</td><td>Full reset</td><td>Whole-home intensive clean</td><td>Yes</td></tr></tbody>
+  </table></div>
+  <div class="issues">
+    <div class="issue"><i class="dot"></i><div><b>Rename “Hoarder's Haven”</b><span>Use more respectful, search-aligned language such as “Compassionate Decluttering & Hoarding Cleanup.”</span></div></div>
+    <div class="issue"><i class="dot"></i><div><b>Create focused child pages for distinct search intents</b><span>Move-in / move-out cleaning, deep cleaning, recurring cleaning and organization can each support a dedicated transactional page while this URL acts as the hub.</span></div></div>
+  </div>
+</section>
+
+<section id="pricing" class="section">
+  <div class="page-head"><div><div class="eyebrow">Page audit</div><h2>Pricing</h2><p class="section-intro">Potentially one of the strongest conversion pages because real rates are published. The opportunity is to make the numbers unambiguous.</p></div><a class="page-link" href="https://www.nlwilsonmovers.com/pricing" target="_blank" rel="noopener">Open live page ↗</a></div>
+  <div class="callout"><h3>Turn “price information” into “decision support.”</h3><p>People do not just want numbers. They want to understand what the numbers apply to, what the minimum is, what gets added, and what a realistic move might cost.</p></div>
+  <div class="grid">
+    <div class="card"><span class="tag critical">Clarity</span><h3>State the unit next to every rate</h3><p>If $210 is hourly, write <b>$210 / hour</b>. Do not make visitors infer the billing unit from a separate three-hour-minimum note.</p></div>
+    <div class="card"><span class="tag high">Structure</span><h3>Name each pricing category</h3><p>Use explicit headings such as “Moving With Truck,” “Labor-Only Moving,” and “Gun Safe Moving” instead of repeating generic Description / Starting Rate tables.</p></div>
+    <div class="card"><span class="tag high">Transparency</span><h3>Explain every surcharge</h3><p>Clarify trip / fuel surcharges, distance rules, stair or specialty fees, packing materials and exactly when billed time starts.</p></div>
+    <div class="card"><span class="tag win">Conversion</span><h3>Show one worked example</h3><p>Example: crew × hours + applicable surcharge = estimated local move. Then route to “Get an exact quote.”</p></div>
+  </div>
+</section>
+
+<section id="contact" class="section">
+  <div class="page-head"><div><div class="eyebrow">Page audit</div><h2>Contact</h2><p class="section-intro">The highest-friction page in the audited set because it relies heavily on the form without doing enough to reduce uncertainty around the next step.</p></div><a class="page-link" href="https://www.nlwilsonmovers.com/contact" target="_blank" rel="noopener">Open live page ↗</a></div>
+  <div class="grid">
+    <div class="card"><span class="tag critical">SEO / UX</span><h3>Give the page a meaningful H1</h3><p>Use something like “Get Your Free Moving Estimate” or “Contact NL Wilson Moving & Storage in Olathe.” The page should have a clear purpose even if the form script fails to render.</p></div>
+    <div class="card"><span class="tag high">Trust</span><h3>Put confidence signals beside the form</h3><p>Phone, business hours, location, service area, licensing, Bekins affiliation and a brief review signal belong next to the conversion form.</p></div>
+  </div>
+  <div class="subhead">Recommended page flow</div>
+  <div class="quick">
+    <div class="item"><div><h3>Tell us about your move</h3><p>Ask only for the details needed to qualify and respond efficiently.</p></div></div>
+    <div class="item"><div><h3>We review the details</h3><p>Set an expectation for response channel and typical next step.</p></div></div>
+    <div class="item"><div><h3>You receive your estimate / next steps</h3><p>Remove ambiguity about what submitting the form actually triggers.</p></div></div>
+  </div>
+  <div class="quote">Add a secondary path: “Looking for pricing first? See Moving Rates →” so visitors can self-educate without abandoning the funnel.</div>
+</section>
+
+<section id="roadmap" class="section">
+  <h2>90-day roadmap</h2>
+  <p class="section-intro">Sequence the work so structural improvements compound before additional content production.</p>
+  <div class="grid3">
+    <div class="card"><div class="eyebrow">Days 1–30</div><h3>Repair trust & structure</h3><ul class="bullets"><li>Full content QA crawl</li><li>Fix titles / H1s</li><li>Standardize CTA language</li><li>Rework header hierarchy</li><li>Add Service Areas hub</li></ul></div>
+    <div class="card"><div class="eyebrow">Days 31–60</div><h3>Improve conversion</h3><ul class="bullets"><li>Rebuild Pricing layout</li><li>Rebuild Contact layout</li><li>Add breadcrumbs</li><li>Improve service comparison tables</li><li>Page-specific testimonials</li></ul></div>
+    <div class="card"><div class="eyebrow">Days 61–90</div><h3>Strengthen local SEO</h3><ul class="bullets"><li>Upgrade top city pages</li><li>Add city-specific proof</li><li>Verify structured data</li><li>Strengthen internal linking</li><li>Expand content only where demand justifies it</li></ul></div>
+  </div>
+</section>
+
+<footer class="footer">NL Wilson Moving & Storage — UX, UI & SEO audit · Prepared as a decision-support document, not a redesign specification.</footer>
+</main>
+</div>
+<script>
+const links=[...document.querySelectorAll('.nav a')];
+const sections=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'-15% 0px -72% 0px',threshold:0});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>document.body.classList.remove('menu-open')));
+</script>
+</body>
+</html>
